@@ -70,6 +70,8 @@ module TreeBench
 
   def self.setup!
     connect!
+    require_relative "tree_bench/ancestry_model"
+    require_relative "tree_bench/closure_tree_model"
     create_tables!
   end
 
@@ -79,18 +81,6 @@ module TreeBench
     when "mysql2", "trilogy" then "mysql"
     else "sqlite"
     end
-  end
-
-  # -- Models --
-
-  class AncestryNode < ActiveRecord::Base
-    require "ancestry"
-    has_ancestry cache_depth: true
-  end
-
-  class ClosureTreeNode < ActiveRecord::Base
-    require "closure_tree"
-    has_closure_tree order: "sort_order"
   end
 
   # -- Tree Shapes --

@@ -3,8 +3,8 @@ require_relative "../lib/tree_bench"
 TreeBench.setup!
 
 GEMS = {
-  "ancestry"      => TreeBench::AncestryNode,
-  "closure_tree"  => TreeBench::ClosureTreeNode,
+  "ancestry"      => AncestryNode,
+  "closure_tree"  => ClosureTreeNode,
 }
 
 def capture_sql(&block)

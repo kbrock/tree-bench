@@ -4,7 +4,7 @@ require "benchmark/sweet"
 TreeBench.setup!
 
 gem_name = ENV.fetch("GEM", "ancestry")
-model = gem_name == "closure_tree" ? TreeBench::ClosureTreeNode : TreeBench::AncestryNode
+model = gem_name == "closure_tree" ? ClosureTreeNode : AncestryNode
 tag = ENV.fetch("TAG", "current")
 
 Benchmark.items(metrics: %w[queries rows ips]) do |x|
