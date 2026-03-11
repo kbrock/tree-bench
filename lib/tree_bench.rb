@@ -1,6 +1,8 @@
 require "active_record"
+require "ancestry"
 require "benchmark/sweet"
 require "logger"
+require "optparse"
 
 module TreeBench
   DB = ENV.fetch("DB", "sqlite")
@@ -80,6 +82,139 @@ module TreeBench
     when "postgresql", "pg" then "pg"
     when "mysql2", "trilogy" then "mysql"
     else "sqlite"
+    end
+  end
+
+  # -- Config Registry --
+
+  CONFIGS = {
+    "mp1" => {
+      ancestry: { cache_depth: true },
+      table: ->(t) {
+        t.string :ancestry
+        t.integer :ancestry_depth, default: 0
+        t.index :ancestry
+      },
+    },
+    "mp2" => {
+      ancestry: { cache_depth: true, ancestry_format: :materialized_path2 },
+      table: ->(t) {
+        t.string :ancestry, null: false
+        t.integer :ancestry_depth, default: 0
+        t.index :ancestry
+      },
+    },
+    "mp1-parent" => {
+      ancestry: { cache_depth: true, parent: true },
+      table: ->(t) {
+        t.string :ancestry
+        t.integer :ancestry_depth, default: 0
+        t.integer :parent_id
+        t.index :ancestry
+      },
+    },
+    "mp2-parent" => {
+      ancestry: { cache_depth: true, ancestry_format: :materialized_path2, parent: true },
+      table: ->(t) {
+        t.string :ancestry, null: false
+        t.integer :ancestry_depth, default: 0
+        t.integer :parent_id
+        t.index :ancestry
+      },
+    },
+    "mp1-parent-root" => {
+      ancestry: { cache_depth: true, parent: true, root: true },
+      table: ->(t) {
+        t.string :ancestry
+        t.integer :ancestry_depth, default: 0
+        t.integer :parent_id
+        t.integer :root_id
+        t.index :ancestry
+      },
+    },
+    "mp2-parent-root" => {
+      ancestry: { cache_depth: true, ancestry_format: :materialized_path2, parent: true, root: true },
+      table: ->(t) {
+        t.string :ancestry, null: false
+        t.integer :ancestry_depth, default: 0
+        t.integer :parent_id
+        t.integer :root_id
+        t.index :ancestry
+      },
+    },
+  }.freeze
+
+  def self.build_config!(config_name)
+    cfg = CONFIGS.fetch(config_name) { abort "Unknown config: #{config_name}. Use: #{CONFIGS.keys.join(', ')}" }
+
+    ActiveRecord::Schema.define do
+      create_table :ancestry_nodes, force: true do |t|
+        t.string :name
+        instance_exec(t, &cfg[:table])
+      end
+    end
+
+    Object.send(:remove_const, :BenchNode) if defined?(::BenchNode)
+    klass = Class.new(ActiveRecord::Base) { self.table_name = "ancestry_nodes" }
+    Object.const_set(:BenchNode, klass)
+    klass.has_ancestry(**cfg[:ancestry])
+    klass.reset_column_information
+    klass
+  end
+
+  # -- Suite --
+
+  module Suite
+    SUITES = {
+      "configs" => {
+        required: [:config],
+        defaults: { tag: "current" },
+        compare_by: [:config, :shape, :operation],
+        report_with: { row: :operation, column: :config },
+      },
+      "versions" => {
+        required: [:tag],
+        defaults: { config: "mp1" },
+        compare_by: [:version, :shape, :operation],
+        report_with: { grouping: [:shape, :db], row: :operation, column: :version },
+      },
+    }.freeze
+
+    def self.parse!
+      options = {}
+
+      OptionParser.new do |opts|
+        opts.banner = "Usage: ruby bench/XXX_bench.rb -s SUITE [options]"
+        opts.on("-s", "--suite SUITE", "Suite: #{SUITES.keys.join(', ')}") { |v| options[:suite] = v }
+        opts.on("-c", "--config CONFIG", "Config: #{CONFIGS.keys.join(', ')}") { |v| options[:config] = v }
+        opts.on("-t", "--tag TAG", "Version tag") { |v| options[:tag] = v }
+        opts.on("--force", "Clear results file before running") { options[:force] = true }
+      end.parse!
+
+      options[:suite] || abort("--suite is required. Use: #{SUITES.keys.join(', ')}")
+      options
+    end
+
+    def self.setup(x, options, bench_type)
+      suite_name = options[:suite]
+      suite = SUITES.fetch(suite_name) { abort "Unknown suite: #{suite_name}. Use: #{SUITES.keys.join(', ')}" }
+
+      # Apply defaults, then validate required
+      suite[:defaults]&.each { |k, v| options[k] ||= v }
+      suite[:required].each do |key|
+        options[key] || abort("--#{key} is required for '#{suite_name}' suite")
+      end
+
+      file = "results/#{suite_name}_#{bench_type}.json"
+      File.delete(file) if options[:force] && File.exist?(file)
+
+      x.save_file file
+      x.compare_by(*suite[:compare_by])
+      x.report_with(**suite[:report_with])
+    end
+
+    def self.metadata(options)
+      { config: options[:config], version: options[:tag], db: TreeBench.db_name }
     end
   end
 
