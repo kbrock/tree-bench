@@ -1,22 +1,15 @@
-require_relative "../lib/tree_bench"
-require "benchmark/sweet"
+require_relative "lib/tree_bench"
 
-TreeBench.setup!
-
-gem_name = ENV.fetch("GEM", "ancestry")
-model = gem_name == "closure_tree" ? ClosureTreeNode : AncestryNode
-tag = ENV.fetch("TAG", "current")
+options = TreeBench::Suite.parse!
+TreeBench.connect!
 
 Benchmark.items(metrics: %w[queries rows ips]) do |x|
-  x.save_file "results/write_bench.json"
-  x.compare_by :shape, :db, :operation
-  x.report_with grouping: [:shape, :db], row: :operation, column: :version
-
+  TreeBench::Suite.setup(x, options)
   TreeBench::TreeShapes::SHAPES.each do |shape|
-    TreeBench.create_tables!
+    model = TreeBench.build_config!(options[:config])
     t = TreeBench::TreeShapes.build(shape, model)
 
-    x.metadata gem: gem_name, db: TreeBench.db_name, shape: shape, version: tag do
+    x.metadata(shape: shape) do
       root = t[:root]
       node = t[:mid]
       leaf = t[:leaf]
@@ -62,11 +55,13 @@ Benchmark.items(metrics: %w[queries rows ips]) do |x|
     end
 
     # Build tree from scratch — separate because it recreates tables
-    x.metadata gem: gem_name, db: TreeBench.db_name, shape: shape, version: tag do
+    x.metadata(shape: shape) do
       x.report(operation: "build tree") do
-        TreeBench.create_tables!
+        TreeBench.build_config!(options[:config])
         TreeBench::TreeShapes.build(shape, model)
       end
     end
   end
+  x.save_file $PROGRAM_NAME.sub(".rb", "_#{options[:suite]}.json")
+  x.save_sql $PROGRAM_NAME.sub(".rb", "-#{options[:version]}.sql")
 end

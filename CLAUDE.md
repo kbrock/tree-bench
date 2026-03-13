@@ -4,21 +4,35 @@ Performance benchmark suite for the ancestry gem.
 
 ## Project Structure
 
-- `bench/read_bench.rb` — Read operation benchmarks (IPS, queries, rows)
-- `bench/write_bench.rb` — Write operation benchmarks (insert, move, destroy)
-- `bench/sql_compare.rb` — SQL capture tool (dumps actual SQL per operation)
-- `lib/tree_bench.rb` — DB setup, table creation, tree shape builders
-- `lib/tree_bench/ancestry_model.rb` — AncestryNode model (loaded after connect)
-- `lib/tree_bench/closure_tree_model.rb` — ClosureTreeNode model (loaded after connect)
-- `results/` — JSON benchmark results (accumulate across runs via benchmark-sweet)
+- `read_bench.rb` — Read operation benchmarks (IPS, queries, rows)
+- `write_bench.rb` — Write operation benchmarks (insert, move, destroy)
+- `descendant_bench.rb` — Descendant-focused benchmarks
+- `sql_diff.rb` — Compare SQL output files across versions
+- `lib/tree_bench.rb` — DB setup, config registry, suite system, tree shape builders
+- `lib/ancestry_model.rb` — AncestryNode model (loaded after connect)
+- `lib/closure_tree_model.rb` — ClosureTreeNode model (loaded after connect)
 
 ## Running Benchmarks
 
 ```bash
-TAG=mytag DB=sqlite bundle exec ruby bench/read_bench.rb
-TAG=mytag DB=sqlite bundle exec ruby bench/write_bench.rb
-DB=sqlite bundle exec ruby bench/sql_compare.rb
+# Compare configs (default suite when no -v given, results accumulate)
+DB=pg bundle exec ruby read_bench.rb -c mp1
+DB=pg bundle exec ruby read_bench.rb -c mp2
+DB=pg bundle exec ruby read_bench.rb -c mp3
+
+# Compare versions (auto-selected when -v given, results accumulate)
+DB=pg bundle exec ruby read_bench.rb -v v5
+DB=pg bundle exec ruby read_bench.rb -v v6
+
+# Compare SQL patterns across versions
+ruby sql_diff.rb read_bench-v5.sql read_bench-v6.sql
 ```
+
+## Output Files
+
+Derived from script name:
+- `read_bench_versions.json` / `read_bench_configs.json` — benchmark results
+- `read_bench-current.sql` / `read_bench-v6.sql` — SQL patterns + EXPLAIN plans
 
 ## Why Model Files Are Separate
 
@@ -27,64 +41,32 @@ after `connect!`, so `setup!` does `require_relative` after establishing the con
 
 ## Ancestry Gem
 
-Points to local ancestry at `../ancestry` (see Gemfile). This is the primary gem under optimization.
+Points to local ancestry at `../ancestry` and local benchmark-sweet at `../benchmark-sweet` (see Gemfile).
 
-## Planned: Suite + Config System
-
-The current bench scripts hardcode one ancestry configuration (mp1, cache_depth: true).
-We want to compare different configurations (mp1 vs mp2, parent cache vs virtual, etc.)
-and different code versions, without results from different experiments mixing together.
+## Suite + Config System
 
 ### Suites
 
-A suite is "a question you're trying to answer." It determines the output file,
-`compare_by`, and `report_with` axes. Defined as a case block in the bench script:
+A suite determines `compare_by` and `report_with` axes. Defaults to `versions`.
 
-```ruby
-case suite
-when "configs"
-  # Comparing ancestry configurations (mp1 vs mp2 vs parent cache etc.)
-  # CONFIG is required, TAG optional
-  x.save_file "results/config_read.json"
-  x.compare_by :config, :shape, :operation
-  x.report_with row: :operation, column: :config
-when "versions"
-  # Comparing code changes over time
-  # TAG is required, CONFIG defaults to mp1
-  x.save_file "results/version_read.json"
-  x.compare_by :version, :shape, :operation
-  x.report_with row: :operation, column: :version
-end
-```
+- **configs** — Comparing ancestry configurations (mp1 vs mp2 vs mp3 etc.). Requires `-c CONFIG`.
+- **versions** — Comparing code changes over time. Requires `-v VERSION`, defaults config to mp1.
 
-Each suite uses a **separate JSON file** so results from different experiments
-don't pollute each other. The suite validates required params and warns on unexpected ones.
+Each suite uses a separate JSON file so results from different experiments don't mix.
 
 ### Config Registry
 
 Maps config names to table schema + has_ancestry options:
 
-```ruby
-CONFIGS = {
-  "mp1"            => { ancestry: { cache_depth: true } },
-  "mp2"            => { ancestry: { cache_depth: true, ancestry_format: :materialized_path2 } },
-  "mp1-parent"     => { ancestry: { cache_depth: true, parent: true } },
-  "mp1-parent-virt"=> { ancestry: { cache_depth: true, parent: :virtual } },
-}
-```
+- `mp1`, `mp2`, `mp3` — base configs (materialized_path, _path2, _path3)
+- `mp1-parent`, `mp2-parent`, `mp3-parent` — with physical parent column
+- `mp1-parent-root`, `mp2-parent-root`, `mp3-parent-root` — with physical parent + root columns
+- `mp1-virt`, `mp2-virt`, `mp3-virt` — with virtual parent + root (no extra columns)
 
-The config drives table creation (column type, nullability, indexes) and
-`has_ancestry` options. Adding a new config = adding one hash entry.
-
-### Shapes
-
-Shapes (wide/deep/mixed) are always iterated internally — they're test fixtures,
-not a variable you compare. Each shape exercises different performance characteristics.
+Adding a new config = adding one hash entry to `CONFIGS` in `lib/tree_bench.rb`.
 
 ### Key Design Points
 
-- Separate JSON files per suite prevents stale/mixed data in reports
-- Suite case block is shared between read_bench and write_bench
-- Config registry is shared across all suites and sql_compare
-- Shapes iterate internally, other dimensions come from env/CLI args
-- Use getopts for CLI — validate required params, warn on unexpected ones
+- Config registry is shared across all suites
+- Shapes (wide/deep/mixed) iterate internally — they're fixtures, not comparison axes
+- Don't change bench scripts without asking — commented-out operations are intentional notes

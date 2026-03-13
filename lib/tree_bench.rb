@@ -15,6 +15,7 @@ module TreeBench
         database: "tree_bench",
         host: ENV.fetch("PGHOST", "localhost")
       )
+      ActiveRecord::Base.connection.execute("CREATE EXTENSION IF NOT EXISTS ltree")
     when "sqlite", "sqlite3"
       ActiveRecord::Base.establish_connection(
         adapter: "sqlite3",
@@ -72,8 +73,8 @@ module TreeBench
 
   def self.setup!
     connect!
-    require_relative "tree_bench/ancestry_model"
-    require_relative "tree_bench/closure_tree_model"
+    require_relative "ancestry_model"
+    require_relative "closure_tree_model"
     create_tables!
   end
 
@@ -142,6 +143,74 @@ module TreeBench
         t.index :ancestry
       },
     },
+    "mp3" => {
+      ancestry: { cache_depth: true, ancestry_format: :materialized_path3 },
+      table: ->(t) {
+        t.string :ancestry, null: false
+        t.integer :ancestry_depth, default: 0
+        t.index :ancestry
+      },
+    },
+    "mp3-parent" => {
+      ancestry: { cache_depth: true, ancestry_format: :materialized_path3, parent: true },
+      table: ->(t) {
+        t.string :ancestry, null: false
+        t.integer :ancestry_depth, default: 0
+        t.integer :parent_id
+        t.index :ancestry
+      },
+    },
+    "mp3-parent-root" => {
+      ancestry: { cache_depth: true, ancestry_format: :materialized_path3, parent: true, root: true },
+      table: ->(t) {
+        t.string :ancestry, null: false
+        t.integer :ancestry_depth, default: 0
+        t.integer :parent_id
+        t.integer :root_id
+        t.index :ancestry
+      },
+    },
+    "mp1-virt" => {
+      ancestry: { cache_depth: true, parent: :virtual, root: :virtual },
+      table: ->(t) {
+        t.string :ancestry
+        t.integer :ancestry_depth, default: 0
+        t.index :ancestry
+      },
+    },
+    "mp2-virt" => {
+      ancestry: { cache_depth: true, ancestry_format: :materialized_path2, parent: :virtual, root: :virtual },
+      table: ->(t) {
+        t.string :ancestry, null: false
+        t.integer :ancestry_depth, default: 0
+        t.index :ancestry
+      },
+    },
+    "mp3-virt" => {
+      ancestry: { cache_depth: true, ancestry_format: :materialized_path3, parent: :virtual, root: :virtual },
+      table: ->(t) {
+        t.string :ancestry, null: false
+        t.integer :ancestry_depth, default: 0
+        t.index :ancestry
+      },
+    },
+    "ltree" => {
+      ancestry: { cache_depth: true, ancestry_format: :ltree },
+      table: ->(t) {
+        t.column :ancestry, :ltree, null: false, default: ""
+        t.integer :ancestry_depth, default: 0
+        t.index :ancestry, using: :gist
+      },
+    },
+    "array" => {
+      ancestry: { cache_depth: true, ancestry_format: :array },
+      table: ->(t) {
+        t.integer :ancestry, array: true, null: false, default: []
+        t.integer :ancestry_depth, default: 0
+        t.index :ancestry, name: "index_ancestry_nodes_on_ancestry_btree"
+        t.index :ancestry, using: :gin, name: "index_ancestry_nodes_on_ancestry_gin"
+      },
+    },
   }.freeze
 
   def self.build_config!(config_name)
@@ -165,56 +234,30 @@ module TreeBench
   # -- Suite --
 
   module Suite
-    SUITES = {
-      "configs" => {
-        required: [:config],
-        defaults: { tag: "current" },
-        compare_by: [:config, :shape, :operation],
-        report_with: { row: :operation, column: :config },
-      },
-      "versions" => {
-        required: [:tag],
-        defaults: { config: "mp1" },
-        compare_by: [:version, :shape, :operation],
-        report_with: { grouping: [:shape, :db], row: :operation, column: :version },
-      },
-    }.freeze
-
     def self.parse!
-      options = {}
+      options = { suite: "configs", config: "mp1", version: "current" }
 
       OptionParser.new do |opts|
-        opts.banner = "Usage: ruby bench/XXX_bench.rb -s SUITE [options]"
-        opts.on("-s", "--suite SUITE", "Suite: #{SUITES.keys.join(', ')}") { |v| options[:suite] = v }
+        opts.banner = "Usage: ruby #{File.basename($PROGRAM_NAME)} [options]"
         opts.on("-c", "--config CONFIG", "Config: #{CONFIGS.keys.join(', ')}") { |v| options[:config] = v }
-        opts.on("-t", "--tag TAG", "Version tag") { |v| options[:tag] = v }
-        opts.on("--force", "Clear results file before running") { options[:force] = true }
+        opts.on("-v", "--version VERSION", "Version label") { |v| options[:suite] = "versions" ; options[:version] = v }
       end.parse!
-
-      options[:suite] || abort("--suite is required. Use: #{SUITES.keys.join(', ')}")
       options
     end
 
-    def self.setup(x, options, bench_type)
-      suite_name = options[:suite]
-      suite = SUITES.fetch(suite_name) { abort "Unknown suite: #{suite_name}. Use: #{SUITES.keys.join(', ')}" }
-
-      # Apply defaults, then validate required
-      suite[:defaults]&.each { |k, v| options[k] ||= v }
-      suite[:required].each do |key|
-        options[key] || abort("--#{key} is required for '#{suite_name}' suite")
+    def self.setup(x, options)
+      case options[:suite]
+      when "configs"
+        x.compare_by :shape, :operation
+        x.report_with row: :operation, column: :config, grouping: [:shape]
+      when "versions"
+        x.compare_by :version, :shape, :operation
+        x.report_with grouping: [:shape, :db], row: :operation, column: :version
+      else
+        abort "Unknown suite: #{options[:suite]}. Use: configs, versions"
       end
 
-      file = "results/#{suite_name}_#{bench_type}.json"
-      File.delete(file) if options[:force] && File.exist?(file)
-
-      x.save_file file
-      x.compare_by(*suite[:compare_by])
-      x.report_with(**suite[:report_with])
-    end
-
-    def self.metadata(options)
-      { config: options[:config], version: options[:tag], db: TreeBench.db_name }
+      x.metadata(config: options[:config], version: options[:version], db: TreeBench.db_name)
     end
   end
 
@@ -279,14 +322,3 @@ module TreeBench
     end
   end
 end
-
-# Patch benchmark-sweet to handle AR 7.2+ transaction instrumentation events.
-# QueryCounter subscribes to /active_record/ which now includes transaction
-# events that lack :sql and :record_count keys.
-module Benchmark::Sweet::Queries::QueryCounterTransactionPatch
-  def callback(_name, _start, _finish, _id, payload)
-    return if payload[:sql].nil? && payload[:record_count].nil?
-    super
-  end
-end
-Benchmark::Sweet::Queries::QueryCounter.prepend(Benchmark::Sweet::Queries::QueryCounterTransactionPatch)

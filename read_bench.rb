@@ -1,17 +1,15 @@
-require_relative "../lib/tree_bench"
+require_relative "lib/tree_bench"
 
 options = TreeBench::Suite.parse!
 TreeBench.connect!
 
 Benchmark.items(metrics: %w[queries rows ips]) do |x|
-  TreeBench::Suite.setup(x, options, "read")
-  meta = TreeBench::Suite.metadata(options)
-
+  TreeBench::Suite.setup(x, options)
   TreeBench::TreeShapes::SHAPES.each do |shape|
     model = TreeBench.build_config!(options[:config])
     t = TreeBench::TreeShapes.build(shape, model)
 
-    x.metadata(**meta, shape: shape) do
+    x.metadata(shape: shape) do
       node = t[:mid]
       root = t[:root]
       leaf = t[:leaf]
@@ -37,4 +35,6 @@ Benchmark.items(metrics: %w[queries rows ips]) do |x|
       x.report(operation: "arrange")          { klass.arrange }      # full tree + ruby sorting
     end
   end
+  x.save_file $PROGRAM_NAME.sub(".rb", "_#{options[:suite]}.json")
+  x.save_sql $PROGRAM_NAME.sub(".rb", "-#{options[:version]}.sql")
 end
