@@ -98,7 +98,8 @@ module TreeBench
   # Both accept ancestry_format:, cache_depth:, parent:, root:.
 
   CONFIGS = {
-    "mp1"             => { cache_depth: true },
+    "mp1"             => {},
+    "mp1-depth"       => { cache_depth: true },
     "mp2"             => { format: :materialized_path2, cache_depth: true },
     "mp1-parent"      => { cache_depth: true, parent: true },
     "mp2-parent"      => { format: :materialized_path2, cache_depth: true, parent: true },
@@ -136,7 +137,7 @@ module TreeBench
     Object.send(:remove_const, :BenchNode) if defined?(::BenchNode)
     klass = Class.new(ActiveRecord::Base) { self.table_name = "ancestry_nodes" }
     Object.const_set(:BenchNode, klass)
-    klass.has_ancestry(cache_depth: true)
+    klass.has_ancestry(**opts)
     klass.reset_column_information
     klass
   end
