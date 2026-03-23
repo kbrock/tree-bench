@@ -6,10 +6,12 @@ Performance benchmark suite for the ancestry gem.
 
 - `read_bench.rb` — Read operation benchmarks (IPS, queries, rows) + includes/N+1
 - `write_bench.rb` — Write operation benchmarks (build tree, insert, move, destroy)
+- `compare_bench.rb` — ancestry vs closure_tree side-by-side comparison
 - `sql_diff.rb` — Compare SQL output files across versions
 - `lib/tree_bench.rb` — DB setup, config registry, suite system, tree shape builders
 - `lib/ancestry_model.rb` — AncestryNode model (loaded after connect)
 - `lib/closure_tree_model.rb` — ClosureTreeNode model (loaded after connect)
+- `COMPARISON.md` — closure_tree comparison results and analysis
 
 ## Running Benchmarks
 
@@ -78,3 +80,16 @@ Adding a new config = adding one hash entry to `CONFIGS` in `lib/tree_bench.rb`.
 - Association benchmarks (includes, N+1) are conditional on `reflect_on_association(:children)` — only run for parent/virt configs
 - When benchmarking `has_many :children`, call `node.association(:children).reset` before each iteration to avoid AR association cache hits
 - `arrange_subtree` uses `node.subtree.arrange` — realistic usage (not full-table `klass.arrange`)
+- Version comparison uses `ANCESTRY_PATH` env var + git worktrees (../ancestry-v4.1.0 etc.)
+- `build_config!` falls back to manual column creation for older ancestry versions without `t.ancestry`
+- compare_bench.rb resets closure_tree associations for cold-access measurement. Note in output that CT caches on repeat.
+
+## TODO (local benchmarks)
+
+- Depth-limited scope benchmarks — where `cache_depth` should shine (not yet tested)
+- Write bench: replace transaction rollback with real move-back pattern (b=a.children[0]; b.update(parent: c); b.update(parent: a))
+- Larger table benchmarks (10x scale) — prove whether +1 query matters at realistic sizes
+- closure_tree write comparison (insert/move/destroy)
+- Preload/includes benchmark — ancestry N+1 gap vs CT's `includes(:descendants)`
+- mp1 vs mp1-parent IPS comparison — cost of adding associations
+- GitHub usage survey — who uses ancestry, what options, what version, interesting forks
