@@ -11,7 +11,7 @@ Performance benchmark suite for the ancestry gem.
 - `lib/tree_bench.rb` — DB setup, config registry, suite system, tree shape builders
 - `lib/ancestry_model.rb` — AncestryNode model (loaded after connect)
 - `lib/closure_tree_model.rb` — ClosureTreeNode model (loaded after connect)
-- `COMPARISON.md` — closure_tree comparison results and analysis
+- `FINDINGS.md` — benchmark observations and cross-gem comparison data
 
 ## Running Benchmarks
 
