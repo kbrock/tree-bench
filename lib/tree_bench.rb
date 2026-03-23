@@ -49,9 +49,7 @@ module TreeBench
     ActiveRecord::Schema.define do
       create_table :ancestry_nodes, force: true do |t|
         t.string :name
-        t.string :ancestry
-        t.integer :ancestry_depth, default: 0
-        t.index :ancestry
+        t.ancestry cache_depth: true
       end
 
       create_table :closure_tree_nodes, force: true do |t|
@@ -86,147 +84,59 @@ module TreeBench
     end
   end
 
+  def self.ascii_collation
+    case db_name
+    when "pg" then "C"
+    when "mysql" then "utf8mb4_bin"
+    else nil
+    end
+  end
+
   # -- Config Registry --
+  #
+  # Each config is a single hash splatted into both t.ancestry and has_ancestry.
+  # Both accept ancestry_format:, cache_depth:, parent:, root:.
 
   CONFIGS = {
-    "mp1" => {
-      ancestry: { cache_depth: true },
-      table: ->(t) {
-        t.string :ancestry
-        t.integer :ancestry_depth, default: 0
-        t.index :ancestry
-      },
-    },
-    "mp2" => {
-      ancestry: { cache_depth: true, ancestry_format: :materialized_path2 },
-      table: ->(t) {
-        t.string :ancestry, null: false
-        t.integer :ancestry_depth, default: 0
-        t.index :ancestry
-      },
-    },
-    "mp1-parent" => {
-      ancestry: { cache_depth: true, parent: true },
-      table: ->(t) {
-        t.string :ancestry
-        t.integer :ancestry_depth, default: 0
-        t.integer :parent_id
-        t.index :ancestry
-      },
-    },
-    "mp2-parent" => {
-      ancestry: { cache_depth: true, ancestry_format: :materialized_path2, parent: true },
-      table: ->(t) {
-        t.string :ancestry, null: false
-        t.integer :ancestry_depth, default: 0
-        t.integer :parent_id
-        t.index :ancestry
-      },
-    },
-    "mp1-parent-root" => {
-      ancestry: { cache_depth: true, parent: true, root: true },
-      table: ->(t) {
-        t.string :ancestry
-        t.integer :ancestry_depth, default: 0
-        t.integer :parent_id
-        t.integer :root_id
-        t.index :ancestry
-      },
-    },
-    "mp2-parent-root" => {
-      ancestry: { cache_depth: true, ancestry_format: :materialized_path2, parent: true, root: true },
-      table: ->(t) {
-        t.string :ancestry, null: false
-        t.integer :ancestry_depth, default: 0
-        t.integer :parent_id
-        t.integer :root_id
-        t.index :ancestry
-      },
-    },
-    "mp3" => {
-      ancestry: { cache_depth: true, ancestry_format: :materialized_path3 },
-      table: ->(t) {
-        t.string :ancestry, null: false
-        t.integer :ancestry_depth, default: 0
-        t.index :ancestry
-      },
-    },
-    "mp3-parent" => {
-      ancestry: { cache_depth: true, ancestry_format: :materialized_path3, parent: true },
-      table: ->(t) {
-        t.string :ancestry, null: false
-        t.integer :ancestry_depth, default: 0
-        t.integer :parent_id
-        t.index :ancestry
-      },
-    },
-    "mp3-parent-root" => {
-      ancestry: { cache_depth: true, ancestry_format: :materialized_path3, parent: true, root: true },
-      table: ->(t) {
-        t.string :ancestry, null: false
-        t.integer :ancestry_depth, default: 0
-        t.integer :parent_id
-        t.integer :root_id
-        t.index :ancestry
-      },
-    },
-    "mp1-virt" => {
-      ancestry: { cache_depth: true, parent: :virtual, root: :virtual },
-      table: ->(t) {
-        t.string :ancestry
-        t.integer :ancestry_depth, default: 0
-        t.index :ancestry
-      },
-    },
-    "mp2-virt" => {
-      ancestry: { cache_depth: true, ancestry_format: :materialized_path2, parent: :virtual, root: :virtual },
-      table: ->(t) {
-        t.string :ancestry, null: false
-        t.integer :ancestry_depth, default: 0
-        t.index :ancestry
-      },
-    },
-    "mp3-virt" => {
-      ancestry: { cache_depth: true, ancestry_format: :materialized_path3, parent: :virtual, root: :virtual },
-      table: ->(t) {
-        t.string :ancestry, null: false
-        t.integer :ancestry_depth, default: 0
-        t.index :ancestry
-      },
-    },
-    "ltree" => {
-      ancestry: { cache_depth: true, ancestry_format: :ltree },
-      table: ->(t) {
-        t.column :ancestry, :ltree, null: false, default: ""
-        t.integer :ancestry_depth, default: 0
-        t.index :ancestry, using: :gist
-      },
-    },
-    "array" => {
-      ancestry: { cache_depth: true, ancestry_format: :array },
-      table: ->(t) {
-        t.integer :ancestry, array: true, null: false, default: []
-        t.integer :ancestry_depth, default: 0
-        t.index :ancestry, name: "index_ancestry_nodes_on_ancestry_btree"
-        t.index :ancestry, using: :gin, name: "index_ancestry_nodes_on_ancestry_gin"
-      },
-    },
+    "mp1"             => { cache_depth: true },
+    "mp2"             => { format: :materialized_path2, cache_depth: true },
+    "mp1-parent"      => { cache_depth: true, parent: true },
+    "mp2-parent"      => { format: :materialized_path2, cache_depth: true, parent: true },
+    "mp1-parent-root" => { cache_depth: true, parent: true, root: true },
+    "mp2-parent-root" => { format: :materialized_path2, cache_depth: true, parent: true, root: true },
+    "mp3"             => { format: :materialized_path3, cache_depth: true },
+    "mp3-parent"      => { format: :materialized_path3, cache_depth: true, parent: true },
+    "mp3-parent-root" => { format: :materialized_path3, cache_depth: true, parent: true, root: true },
+    "mp1-virt"        => { cache_depth: true, parent: :virtual, root: :virtual },
+    "mp2-virt"        => { format: :materialized_path2, cache_depth: true, parent: :virtual, root: :virtual },
+    "mp3-virt"        => { format: :materialized_path3, cache_depth: true, parent: :virtual, root: :virtual },
+    "ltree"           => { format: :ltree, cache_depth: true },
+    "array"           => { format: :array, cache_depth: true },
   }.freeze
 
   def self.build_config!(config_name)
-    cfg = CONFIGS.fetch(config_name) { abort "Unknown config: #{config_name}. Use: #{CONFIGS.keys.join(', ')}" }
+    opts = CONFIGS.fetch(config_name) { abort "Unknown config: #{config_name}. Use: #{CONFIGS.keys.join(', ')}" }
 
     ActiveRecord::Schema.define do
       create_table :ancestry_nodes, force: true do |t|
         t.string :name
-        instance_exec(t, &cfg[:table])
+        if t.respond_to?(:ancestry)
+          t.ancestry **opts
+        else
+          # Fallback for ancestry versions without t.ancestry migration helper
+          collation = TreeBench.ascii_collation
+          col_opts = collation ? { collation: collation } : {}
+          t.string :ancestry, **col_opts
+          t.integer :ancestry_depth, default: 0 if opts[:cache_depth]
+          t.index :ancestry
+        end
       end
     end
 
     Object.send(:remove_const, :BenchNode) if defined?(::BenchNode)
     klass = Class.new(ActiveRecord::Base) { self.table_name = "ancestry_nodes" }
     Object.const_set(:BenchNode, klass)
-    klass.has_ancestry(**cfg[:ancestry])
+    klass.has_ancestry(cache_depth: true)
     klass.reset_column_information
     klass
   end
@@ -241,23 +151,44 @@ module TreeBench
         opts.banner = "Usage: ruby #{File.basename($PROGRAM_NAME)} [options]"
         opts.on("-c", "--config CONFIG", "Config: #{CONFIGS.keys.join(', ')}") { |v| options[:config] = v }
         opts.on("-v", "--version VERSION", "Version label") { |v| options[:suite] = "versions" ; options[:version] = v }
+        opts.on("--all", "Run all configs") { options[:all] = true }
+        opts.on("--force", "Re-run even if results exist") { options[:force] = true }
+        opts.on("--metrics METRICS", "Metrics: queries,rows,ips (default: all)") { |v| options[:metrics] = v.split(",") }
       end.parse!
       options
+    end
+
+    COMPACT_VALUE = -> c {
+      num = c.central_tendency.round(1)
+      whole, dec = num.to_s.split(".")
+      formatted = whole.gsub(/(\d)(?=(\d{3})+(?!\d))/, '\\1,')
+      formatted = "#{formatted}.#{dec}" if dec
+      val = "#{formatted} #{c.units}"
+      "\033[#{c.color}m#{val}\e[0m"
+    }
+
+    def self.configs(options)
+      if options[:all]
+        TreeBench::CONFIGS.select { |_, cfg| !cfg[:db] || cfg[:db] == TreeBench.db_name }.keys
+      else
+        [options[:config]]
+      end
     end
 
     def self.setup(x, options)
       case options[:suite]
       when "configs"
         x.compare_by :shape, :operation
-        x.report_with row: :operation, column: :config, grouping: [:shape]
+        x.report_with row: :operation, column: :config, grouping: [:shape], value: COMPACT_VALUE
       when "versions"
         x.compare_by :version, :shape, :operation
-        x.report_with grouping: [:shape, :db], row: :operation, column: :version
+        x.report_with grouping: [:shape, :db], row: :operation, column: :version, value: COMPACT_VALUE
       else
         abort "Unknown suite: #{options[:suite]}. Use: configs, versions"
       end
 
-      x.metadata(config: options[:config], version: options[:version], db: TreeBench.db_name)
+      x.configure(force: true) if options[:force]
+      x.metadata(version: options[:version], db: TreeBench.db_name)
     end
   end
 
@@ -265,6 +196,21 @@ module TreeBench
 
   module TreeShapes
     SHAPES = %w[wide deep mixed].freeze
+
+    # Build all shapes into the same table. Returns { "wide" => {root:, mid:, leaf:, model:}, ... }
+    # All shapes coexist — gives ~814 rows total for realistic index behavior.
+    def self.build_all(model)
+      trees = {}
+      SHAPES.each do |shape|
+        before = model.count
+        start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        trees[shape] = send(:"build_#{shape}", model)
+        elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+        added = model.count - before
+        puts "  #{shape}: #{added} records in #{'%.1f' % elapsed}s"
+      end
+      trees
+    end
 
     def self.build(shape, model)
       send(:"build_#{shape}", model)

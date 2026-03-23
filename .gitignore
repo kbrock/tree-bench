@@ -1,0 +1,4 @@
+*.json
+*.sql
+Gemfile.lock
+_old/

@@ -3,38 +3,92 @@ require_relative "lib/tree_bench"
 options = TreeBench::Suite.parse!
 TreeBench.connect!
 
-Benchmark.items(metrics: %w[queries rows ips]) do |x|
-  TreeBench::Suite.setup(x, options)
-  TreeBench::TreeShapes::SHAPES.each do |shape|
-    model = TreeBench.build_config!(options[:config])
-    t = TreeBench::TreeShapes.build(shape, model)
+TreeBench::Suite.configs(options).each do |config|
+  begin
+    Benchmark.items(metrics: options[:metrics] || %w[queries rows ips]) do |x|
+      TreeBench::Suite.setup(x, options)
 
-    x.metadata(shape: shape) do
-      node = t[:mid]
-      root = t[:root]
-      leaf = t[:leaf]
-      klass = t[:model]
+      model = TreeBench.build_config!(config)
+      trees = TreeBench::TreeShapes.build_all(model)
 
-      x.report(operation: "has_parent?")      { node.has_parent? }     # pure ruby: no parse
-      # x.report(operation: "is_root?")       { root.is_root? }      # pure ruby: same as has_parent?
-      x.report(operation: "ancestor_ids")     { node.ancestor_ids }   # pure ruby: parse
-      # x.report(operation: "path_ids")       { node.path_ids }      # pure ruby: ancestor_ids + [id]
-      # x.report(operation: "depth")          { leaf.depth }         # pure ruby: ancestor_ids.size (revisit with depth_cache)
-      x.report(operation: "parent")           { node.parent }        # sql: single record by id
-      x.report(operation: "children")         { node.children.to_a } # sql: WHERE ancestry = X
-      # x.report(operation: "children.count") { node.children.count } # sql: same as children (revisit with counter_cache)
-      # x.report(operation: "child_ids")      { node.child_ids }     # sql: same as children
-      x.report(operation: "ancestors")        { node.ancestors.to_a } # sql: WHERE id IN (...)
-      x.report(operation: "descendants")      { root.descendants.to_a } # sql: WHERE ancestry LIKE X
-      # x.report(operation: "descendant_ids") { root.descendant_ids } # sql: same as descendants
-      # x.report(operation: "subtree")        { root.subtree.to_a }  # sql: descendants + OR self
-      # x.report(operation: "siblings")       { node.siblings.to_a } # sql: same as children (equality)
-      # x.report(operation: "sibling_ids")    { node.sibling_ids }   # sql: same as children (equality)
-      # x.report(operation: "root")           { leaf.root }          # sql: same as parent (revisit with root_id cache)
-      x.report(operation: "roots")            { klass.roots.to_a }   # sql: WHERE ancestry IS NULL
-      x.report(operation: "arrange")          { klass.arrange }      # full tree + ruby sorting
+      trees.each do |shape, t|
+        x.metadata(config: config, shape: shape) do
+          node = t[:mid]
+          root = t[:root]
+          leaf = t[:leaf]
+          klass = t[:model]
+          has_assoc = klass.reflect_on_association(:children)
+          has_root_assoc = klass.reflect_on_association(:root)
+
+          x.report(operation: "has_parent?")      { node.has_parent? }     # pure ruby: no parse
+          # x.report(operation: "is_root?")       { root.is_root? }      # pure ruby: same as has_parent?
+          x.report(operation: "ancestor_ids")     { node.ancestor_ids }   # pure ruby: parse
+          # x.report(operation: "path_ids")       { node.path_ids }      # pure ruby: ancestor_ids + [id]
+          # x.report(operation: "depth")          { leaf.depth }         # pure ruby: ancestor_ids.size (revisit with depth_cache)
+          x.report(operation: "parent")           { node.parent }        # sql: single record by id
+          if has_assoc # assoc: WHERE parent_id = X (reset to avoid cache hit)
+            x.report(operation: "children") { node.association(:children).reset; node.children.to_a }
+          else         # scope: WHERE ancestry = X
+            x.report(operation: "children") { node.children.to_a }
+          end
+          # x.report(operation: "children.count") { node.children.count } # sql: same as children (revisit with counter_cache)
+          # x.report(operation: "child_ids")      { node.child_ids }     # sql: same as children
+          x.report(operation: "ancestors")        { node.ancestors.to_a } # sql: WHERE id IN (...)
+          # All shapes coexist in one table (~814 rows), so node.descendants
+          # returns a selective subset — not the whole table.
+          x.report(operation: "descendants")      { node.descendants.to_a } # sql: WHERE ancestry LIKE X
+          # x.report(operation: "descendant_ids") { node.descendant_ids } # sql: same as descendants
+          # x.report(operation: "subtree")        { node.subtree.to_a }  # sql: descendants + OR self
+          # x.report(operation: "siblings")       { node.siblings.to_a } # sql: same as children (equality)
+          # x.report(operation: "sibling_ids")    { node.sibling_ids }   # sql: same as children (equality)
+          # x.report(operation: "root")           { leaf.root }          # sql: same as parent (revisit with root_id cache)
+          x.report(operation: "roots")            { klass.roots.to_a }   # sql: WHERE ancestry IS NULL
+          x.report(operation: "arrange")          { klass.arrange }      # full tree + ruby sorting
+          x.report(operation: "arrange_subtree")  { node.subtree.arrange } # subtree arrange (not full table)
+
+          # -- Association benchmarks (only with parent: true / :virtual) --
+          # These show N+1 avoidance via includes. Comparing:
+          #   loop approach (N+1 queries) vs includes (2 queries)
+          if has_assoc
+            depth1 = klass.where(ancestry_depth: 1)
+
+            x.report(operation: "each.parent") do          # N+1: 1 query + N parent lookups
+              depth1.each { |n| n.parent }
+            end
+            x.report(operation: "includes(:parent)") do    # 2 queries total
+              depth1.includes(:parent).each { |n| n.parent }
+            end
+
+            x.report(operation: "each.children") do        # N+1: 1 query + N children lookups
+              depth1.each { |n| n.children.to_a }
+            end
+            x.report(operation: "includes(:children)") do  # 2 queries total
+              depth1.includes(:children).each { |n| n.children.to_a }
+            end
+
+            # Multi-node access: where(id: [...]).includes(:children)
+            # Shows the association API advantage over children_of(single_node) loops
+            multi_ids = [root.id, node.id]
+            x.report(operation: "multi.includes(:children)") do
+              klass.where(id: multi_ids).includes(:children).each { |n| n.children.to_a }
+            end
+
+            if has_root_assoc
+              x.report(operation: "each.root") do          # N+1: 1 query + N root lookups
+                depth1.each { |n| n.root }
+              end
+              x.report(operation: "includes(:root)") do    # 2 queries total
+                depth1.includes(:root).each { |n| n.root }
+              end
+            end
+          end
+        end
+      end
+
+      x.save_file $PROGRAM_NAME.sub(".rb", "_#{options[:suite]}.json")
+      x.save_sql $PROGRAM_NAME.sub(".rb", "-#{config}-#{options[:version]}.sql")
     end
+  rescue => e
+    warn "SKIP #{config}: #{e.message}"
   end
-  x.save_file $PROGRAM_NAME.sub(".rb", "_#{options[:suite]}.json")
-  x.save_sql $PROGRAM_NAME.sub(".rb", "-#{options[:version]}.sql")
 end
