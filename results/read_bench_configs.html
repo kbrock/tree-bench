@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Read Benchmarks — Config Comparison</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #fff;
+      color: #1f2328;
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h1 { font-size: 1.5rem; font-weight: 600; }
+    h2 { font-size: 1.1rem; font-weight: 600; margin-top: 2rem; color: #656d76; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0.5rem 0 1.5rem;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.4rem 0.75rem;
+      text-align: right;
+      border-bottom: 1px solid #d1d9e0;
+    }
+    th {
+      font-weight: 600;
+      color: #656d76;
+      border-bottom: 2px solid #d1d9e0;
+    }
+    td.row-label {
+      text-align: left;
+      font-weight: 500;
+    }
+    td.metric { font-variant-numeric: tabular-nums; }
+    td.best { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Read Benchmarks — Config Comparison</h1>
+    <h2>deep (ips)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>mp2</th>
+        <th>mp2-parent</th>
+        <th>mp3-parent</th>
+        <th>mp2-virt</th>
+        <th>ltree</th>
+        <th>mp3-virt</th>
+        <th>mp3-parent-root</th>
+        <th>mp3</th>
+        <th>mp2-parent-root</th>
+        <th>array</th>
+        <th>mp1</th>
+        <th>mp1-parent</th>
+        <th>mp1-virt</th>
+        <th>mp1-parent-root</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">has_parent?</td>
+        <td class="metric best" style="color: #1a7f37" title="best">5,751,697.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,695,840.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,670,847.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,659,009.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.02x slower (± 1.0%)">5,639,455.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.02x slower (± 0.9%)">5,637,258.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.03x slower (± 1.5%)">5,577,213.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.04x slower (± 0.8%)">5,516,480</td>
+        <td class="metric slower" style="color: #656d76" title="1.04x slower (± 0.9%)">5,507,483</td>
+        <td class="metric slower" style="color: #656d76" title="1.10x slower (± 1.8%)">5,226,043</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.16x slower (± 1.2%)">4,962,087</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.16x slower (± 0.9%)">4,976,216.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.16x slower (± 0.9%)">4,961,358.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.16x slower (± 1.1%)">4,944,257</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric slower" style="color: #656d76" title="170.74x slower (± 1.2%)">215,511.8</td>
+        <td class="metric slower" style="color: #656d76" title="169.13x slower (± 1.0%)">217,565.8</td>
+        <td class="metric slower" style="color: #656d76" title="167.07x slower (± 1.5%)">220,252.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="173.43x slower (± 1.4%)">212,166.8</td>
+        <td class="metric slower" style="color: #656d76" title="166.61x slower (± 0.9%)">220,854</td>
+        <td class="metric slower" style="color: #656d76" title="167.10x slower (± 1.2%)">220,215.1</td>
+        <td class="metric slower" style="color: #656d76" title="167.65x slower (± 1.4%)">219,488</td>
+        <td class="metric slower" style="color: #656d76" title="171.17x slower (± 1.3%)">214,967.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="175.83x slower (± 1.0%)">209,271.9</td>
+        <td class="metric slower" style="color: #656d76" title="8.43x slower (± 1.0%)">4,363,490.9</td>
+        <td class="metric slower" style="color: #656d76" title="63.66x slower (± 1.1%)">578,016</td>
+        <td class="metric slower" style="color: #656d76" title="63.06x slower (± 1.1%)">583,533.1</td>
+        <td class="metric slower" style="color: #656d76" title="166.80x slower (± 1.0%)">220,611.2</td>
+        <td class="metric slower" style="color: #656d76" title="166.70x slower (± 1.3%)">220,736.8</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent</td>
+        <td class="metric slower" style="color: #656d76" title="1.60x slower (± 2.2%)">9,677.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.64x slower (± 2.7%)">9,443.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.65x slower (± 8.6%)">9,372.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.66x slower (± 2.4%)">9,297.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.64x slower (± 1.7%)">9,450.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.67x slower (± 1.5%)">9,238.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.66x slower (± 2.0%)">9,321</td>
+        <td class="metric slower" style="color: #656d76" title="1.59x slower (± 1.6%)">9,741.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.64x slower (± 1.7%)">9,413.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.55x slower (± 1.7%)">9,988.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.55x slower (± 3.0%)">10,001.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.60x slower (± 2.9%)">9,640.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.65x slower (± 1.5%)">9,354.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.66x slower (± 2.6%)">9,334.1</td>
+      </tr>
+      <tr>
+        <td class="row-label">children</td>
+        <td class="metric slower" style="color: #656d76" title="1.93x slower (± 1.6%)">10,070.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.90x slower (± 1.2%)">10,219</td>
+        <td class="metric slower" style="color: #656d76" title="1.98x slower (± 9.7%)">9,813.1</td>
+        <td class="metric slower" style="color: #656d76" title="1.98x slower (± 3.7%)">9,800.3</td>
+        <td class="metric slower" style="color: #656d76" title="2.15x slower (± 2.4%)">9,020.6</td>
+        <td class="metric slower" style="color: #656d76" title="1.99x slower (± 1.4%)">9,772.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.96x slower (± 1.2%)">9,933</td>
+        <td class="metric slower" style="color: #656d76" title="1.92x slower (± 1.4%)">10,145.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.93x slower (± 1.2%)">10,053.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.51x slower (± 2.4%)">7,743.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.90x slower (± 1.2%)">10,222.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.92x slower (± 1.3%)">10,099.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.95x slower (± 1.2%)">9,965.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.93x slower (± 0.8%)">10,050.4</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestors</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.70x slower (± 1.6%)">4,200.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.72x slower (± 1.7%)">4,149.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.73x slower (± 1.3%)">4,133.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.89x slower (± 17.6%)">3,774</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.74x slower (± 2.0%)">4,094.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.20x slower (± 34.7%)">3,246.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.76x slower (± 1.8%)">4,055.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.70x slower (± 2.8%)">4,187</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.75x slower (± 1.5%)">4,076.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.71x slower (± 2.1%)">4,166.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.64x slower (± 2.1%)">4,335.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.72x slower (± 1.7%)">4,140.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.12x slower (± 35.2%)">3,360.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.18x slower (± 37.1%)">3,268.2</td>
+      </tr>
+      <tr>
+        <td class="row-label">descendants</td>
+        <td class="metric slower" style="color: #656d76" title="1.25x slower (± 2.0%)">5,433.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.29x slower (± 2.1%)">5,282.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.32x slower (± 6.0%)">5,164.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="4.82x slower (± 11.3%)">1,414</td>
+        <td class="metric slower" style="color: #656d76" title="1.24x slower (± 2.2%)">5,485.7</td>
+        <td class="metric slower" style="color: #656d76" title="2.25x slower (± 40.3%)">3,024.6</td>
+        <td class="metric slower" style="color: #656d76" title="1.32x slower (± 1.9%)">5,161.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.25x slower (± 1.8%)">5,471.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.32x slower (± 1.7%)">5,169.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.87x slower (± 2.3%)">3,641.6</td>
+        <td class="metric slower" style="color: #656d76" title="1.30x slower (± 1.7%)">5,259.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.38x slower (± 2.6%)">4,955.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="5.14x slower (± 8.7%)">1,325.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="5.05x slower (± 8.7%)">1,350.2</td>
+      </tr>
+      <tr>
+        <td class="row-label">roots</td>
+        <td class="metric slower" style="color: #656d76" title="2.02x slower (± 1.5%)">10,000.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.07x slower (± 3.4%)">9,715.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.11x slower (± 3.2%)">9,567.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.13x slower (± 3.6%)">9,476.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.06x slower (± 2.1%)">9,782.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.14x slower (± 2.2%)">9,416.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.13x slower (± 2.1%)">9,483.3</td>
+        <td class="metric slower" style="color: #656d76" title="2.01x slower (± 2.1%)">10,031.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.11x slower (± 2.3%)">9,574.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.07x slower (± 2.0%)">9,717</td>
+        <td class="metric slower" style="color: #656d76" title="1.86x slower (± 0.8%)">10,823.3</td>
+        <td class="metric slower" style="color: #656d76" title="2.00x slower (± 1.4%)">10,101.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.99x slower (± 3.7%)">10,117.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.98x slower (± 3.8%)">10,179.9</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange</td>
+        <td class="metric slower" style="color: #656d76" title="2.08x slower (± 2.3%)">177.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.13x slower (± 2.9%)">173.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.11x slower (± 4.0%)">174.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.22x slower (± 2.4%)">166.4</td>
+        <td class="metric slower" style="color: #656d76" title="2.03x slower (± 2.2%)">182.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.11x slower (± 2.9%)">175</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.13x slower (± 3.5%)">173.2</td>
+        <td class="metric slower" style="color: #656d76" title="2.07x slower (± 2.8%)">178.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.26x slower (± 5.5%)">163.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.73x slower (± 4.2%)">212.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.33x slower (± 4.7%)">278.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.42x slower (± 3.8%)">260.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.15x slower (± 2.9%)">172</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.14x slower (± 2.9%)">172.1</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange_subtree</td>
+        <td class="metric slower worst" style="color: #cf222e" title="5.02x slower (± 8.7%)">618.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="5.37x slower (± 10.4%)">578.3</td>
+        <td class="metric slower" style="color: #656d76" title="4.35x slower (± 9.5%)">715.1</td>
+        <td class="metric slower" style="color: #656d76" title="4.33x slower (± 5.6%)">717.9</td>
+        <td class="metric slower" style="color: #656d76" title="4.14x slower (± 4.9%)">750.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="5.09x slower (± 10.8%)">610.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="6.44x slower (± 31.5%)">482.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="4.97x slower (± 8.2%)">625.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="5.50x slower (± 12.9%)">564.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="6.55x slower (± 17.5%)">474.7</td>
+        <td class="metric slower" style="color: #656d76" title="3.49x slower (± 21.2%)">890.4</td>
+        <td class="metric slower" style="color: #656d76" title="2.77x slower (± 9.7%)">1,123</td>
+        <td class="metric slower worst" style="color: #cf222e" title="6.97x slower (± 33.2%)">445.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="5.72x slower (± 13.1%)">542.9</td>
+      </tr>
+      <tr>
+        <td class="row-label">includes(:children)</td>
+        <td></td>
+        <td class="metric slower" style="color: #656d76" title="1.08x slower (± 2.9%)">208</td>
+        <td class="metric slower" style="color: #656d76" title="1.09x slower (± 2.4%)">206.1</td>
+        <td class="metric slower" style="color: #656d76" title="1.09x slower (± 2.9%)">204.8</td>
+        <td></td>
+        <td class="metric slower" style="color: #656d76" title="1.08x slower (± 2.4%)">208</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.26x slower (± 5.6%)">177.4</td>
+        <td></td>
+        <td class="metric slower" style="color: #656d76" title="1.11x slower (± 2.0%)">201.8</td>
+        <td></td>
+        <td></td>
+        <td class="metric best" style="color: #1a7f37" title="best">223.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.28x slower (± 5.1%)">175.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.10x slower (± 2.5%)">202.9</td>
+      </tr>
+      <tr>
+        <td class="row-label">each.root</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">82.6</td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">82.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.06x slower (± 5.0%)">79.3</td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">84</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">83.6</td>
+        <td class="metric best" style="color: #1a7f37" title="best">84.4</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>mixed (ips)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>mp2</th>
+        <th>mp2-parent</th>
+        <th>mp2-virt</th>
+        <th>mp3-virt</th>
+        <th>ltree</th>
+        <th>mp3-parent-root</th>
+        <th>mp2-parent-root</th>
+        <th>mp3</th>
+        <th>mp3-parent</th>
+        <th>array</th>
+        <th>mp1-virt</th>
+        <th>mp1</th>
+        <th>mp1-parent</th>
+        <th>mp1-parent-root</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">has_parent?</td>
+        <td class="metric best" style="color: #1a7f37" title="best">5,720,547.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,678,088.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,668,751.1</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,636,069</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,635,119.8</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,570,383.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.04x slower (± 1.6%)">5,504,851.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.04x slower (± 0.9%)">5,480,954.7</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,460,537.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.10x slower (± 2.0%)">5,186,312.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.15x slower (± 1.4%)">4,976,248</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.16x slower (± 1.0%)">4,942,369.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.16x slower (± 0.7%)">4,937,632.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.16x slower (± 1.2%)">4,922,525.8</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric slower" style="color: #656d76" title="19.39x slower (± 1.0%)">1,898,040.3</td>
+        <td class="metric slower" style="color: #656d76" title="19.24x slower (± 1.0%)">1,913,030.3</td>
+        <td class="metric slower" style="color: #656d76" title="19.42x slower (± 0.8%)">1,894,542.9</td>
+        <td class="metric slower" style="color: #656d76" title="17.23x slower (± 0.9%)">2,136,313.9</td>
+        <td class="metric slower" style="color: #656d76" title="16.88x slower (± 1.0%)">2,179,966.4</td>
+        <td class="metric slower" style="color: #656d76" title="17.18x slower (± 2.2%)">2,141,470.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="19.88x slower (± 0.7%)">1,850,787.6</td>
+        <td class="metric slower" style="color: #656d76" title="17.56x slower (± 2.1%)">2,095,861.1</td>
+        <td class="metric slower" style="color: #656d76" title="18.09x slower (± 5.4%)">2,034,188</td>
+        <td class="metric slower" style="color: #656d76" title="8.52x slower (± 1.0%)">4,320,975.3</td>
+        <td class="metric slower" style="color: #656d76" title="17.16x slower (± 0.9%)">2,144,569.5</td>
+        <td class="metric slower" style="color: #656d76" title="11.94x slower (± 3.1%)">3,082,481.9</td>
+        <td class="metric slower" style="color: #656d76" title="11.86x slower (± 1.4%)">3,102,835.3</td>
+        <td class="metric slower" style="color: #656d76" title="17.31x slower (± 0.8%)">2,125,784.4</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.57x slower (± 1.4%)">9,937.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.57x slower (± 1.7%)">9,943.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.60x slower (± 1.8%)">9,766.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.61x slower (± 2.0%)">9,664.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.59x slower (± 1.6%)">9,810.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.62x slower (± 3.9%)">9,650.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.58x slower (± 1.6%)">9,845.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.57x slower (± 2.0%)">9,940.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.61x slower (± 2.8%)">9,687.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.58x slower (± 1.5%)">9,859.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.60x slower (± 1.7%)">9,731.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.54x slower (± 1.6%)">10,158.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.61x slower (± 2.8%)">9,690.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.59x slower (± 2.4%)">9,828.2</td>
+      </tr>
+      <tr>
+        <td class="row-label">children</td>
+        <td class="metric slower" style="color: #656d76" title="1.93x slower (± 1.7%)">10,020.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.03x slower (± 2.7%)">9,513.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.09x slower (± 1.3%)">9,279.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.09x slower (± 1.1%)">9,279.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.05x slower (± 2.6%)">9,440.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.08x slower (± 2.8%)">9,288.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.04x slower (± 0.8%)">9,489.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.91x slower (± 1.8%)">10,127.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.04x slower (± 0.8%)">9,480.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.09x slower (± 2.4%)">9,241.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.06x slower (± 1.2%)">9,396.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.89x slower (± 1.4%)">10,249.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.08x slower (± 1.1%)">9,318.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.03x slower (± 0.9%)">9,510.4</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestors</td>
+        <td class="metric slower" style="color: #656d76" title="1.66x slower (± 1.1%)">9,017.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.67x slower (± 1.5%)">8,981.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.75x slower (± 2.8%)">8,561.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.74x slower (± 2.5%)">8,609.7</td>
+        <td class="metric slower" style="color: #656d76" title="1.67x slower (± 1.5%)">8,973.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.72x slower (± 1.9%)">8,725.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.70x slower (± 2.1%)">8,805.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.65x slower (± 1.0%)">9,088.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.69x slower (± 2.3%)">8,889</td>
+        <td class="metric slower" style="color: #656d76" title="1.67x slower (± 1.3%)">8,983.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.75x slower (± 1.5%)">8,572.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.65x slower (± 1.0%)">9,079.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.75x slower (± 3.5%)">8,576.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.74x slower (± 1.6%)">8,620.8</td>
+      </tr>
+      <tr>
+        <td class="row-label">descendants</td>
+        <td class="metric slower" style="color: #656d76" title="1.26x slower (± 2.1%)">7,423.7</td>
+        <td class="metric slower" style="color: #656d76" title="1.27x slower (± 2.1%)">7,354.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.32x slower (± 2.6%)">7,112.7</td>
+        <td class="metric slower" style="color: #656d76" title="1.31x slower (± 2.6%)">7,155.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.19x slower (± 2.4%)">7,881.7</td>
+        <td class="metric slower" style="color: #656d76" title="1.32x slower (± 4.2%)">7,111.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.29x slower (± 2.3%)">7,241.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.24x slower (± 2.2%)">7,555.7</td>
+        <td class="metric slower" style="color: #656d76" title="1.28x slower (± 2.2%)">7,344.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.80x slower (± 1.9%)">5,207.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.43x slower (± 2.5%)">6,538.1</td>
+        <td class="metric slower" style="color: #656d76" title="1.35x slower (± 2.0%)">6,962.1</td>
+        <td class="metric slower" style="color: #656d76" title="1.47x slower (± 2.3%)">6,377.6</td>
+        <td class="metric slower" style="color: #656d76" title="1.41x slower (± 1.8%)">6,630.7</td>
+      </tr>
+      <tr>
+        <td class="row-label">roots</td>
+        <td class="metric slower" style="color: #656d76" title="2.02x slower (± 1.4%)">9,991.3</td>
+        <td class="metric slower" style="color: #656d76" title="2.05x slower (± 2.0%)">9,814.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.18x slower (± 2.5%)">9,258.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.13x slower (± 1.9%)">9,477.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.07x slower (± 2.7%)">9,716.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.15x slower (± 4.2%)">9,378.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.10x slower (± 2.1%)">9,584.5</td>
+        <td class="metric slower" style="color: #656d76" title="2.01x slower (± 1.8%)">10,043.6</td>
+        <td class="metric slower" style="color: #656d76" title="2.08x slower (± 2.1%)">9,701</td>
+        <td class="metric slower" style="color: #656d76" title="2.07x slower (± 1.5%)">9,740</td>
+        <td class="metric slower" style="color: #656d76" title="1.98x slower (± 1.0%)">10,183.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.86x slower (± 0.7%)">10,846.3</td>
+        <td class="metric slower" style="color: #656d76" title="2.01x slower (± 1.6%)">10,003.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.98x slower (± 1.6%)">10,197</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange</td>
+        <td class="metric slower" style="color: #656d76" title="2.08x slower (± 2.8%)">177.2</td>
+        <td class="metric slower" style="color: #656d76" title="2.12x slower (± 2.9%)">173.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.21x slower (± 3.0%)">166.4</td>
+        <td class="metric slower" style="color: #656d76" title="2.11x slower (± 2.9%)">174.7</td>
+        <td class="metric slower" style="color: #656d76" title="2.02x slower (± 2.7%)">182.8</td>
+        <td class="metric slower" style="color: #656d76" title="2.11x slower (± 2.3%)">174.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.24x slower (± 2.4%)">164.4</td>
+        <td class="metric slower" style="color: #656d76" title="2.07x slower (± 2.8%)">178.1</td>
+        <td class="metric slower" style="color: #656d76" title="2.08x slower (± 3.4%)">176.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.75x slower (± 4.8%)">210.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.14x slower (± 2.9%)">171.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.31x slower (± 3.6%)">281.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.43x slower (± 3.9%)">257.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.15x slower (± 2.9%)">171.4</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange_subtree</td>
+        <td class="metric slower" style="color: #656d76" title="1.82x slower (± 6.2%)">3,605.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.93x slower (± 14.5%)">3,410.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.90x slower (± 6.1%)">3,457.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.85x slower (± 5.3%)">3,556.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.73x slower (± 4.9%)">3,786.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.95x slower (± 7.7%)">3,369.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.86x slower (± 5.9%)">3,531.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.76x slower (± 4.9%)">3,738.6</td>
+        <td class="metric slower" style="color: #656d76" title="1.81x slower (± 6.3%)">3,629.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="6.78x slower (± 19.8%)">968.5</td>
+        <td class="metric slower" style="color: #656d76" title="2.30x slower (± 28.0%)">2,857.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.26x slower (± 5.2%)">5,208.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.58x slower (± 17.7%)">4,157</td>
+        <td class="metric slower" style="color: #656d76" title="1.93x slower (± 6.5%)">3,401</td>
+      </tr>
+      <tr>
+        <td class="row-label">includes(:children)</td>
+        <td></td>
+        <td class="metric slower" style="color: #656d76" title="1.07x slower (± 1.5%)">206.6</td>
+        <td class="metric slower" style="color: #656d76" title="1.09x slower (± 3.0%)">202.7</td>
+        <td class="metric slower" style="color: #656d76" title="1.07x slower (± 2.9%)">206.3</td>
+        <td></td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.25x slower (± 6.2%)">178</td>
+        <td class="metric slower" style="color: #656d76" title="1.09x slower (± 2.5%)">202.6</td>
+        <td></td>
+        <td class="metric slower" style="color: #656d76" title="1.05x slower (± 1.9%)">211.1</td>
+        <td></td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.26x slower (± 6.2%)">176.1</td>
+        <td></td>
+        <td class="metric best" style="color: #1a7f37" title="best">221.7</td>
+        <td class="metric slower" style="color: #656d76" title="1.10x slower (± 1.5%)">202.1</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>wide (ips)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>mp2</th>
+        <th>mp2-parent</th>
+        <th>ltree</th>
+        <th>mp3-virt</th>
+        <th>mp2-virt</th>
+        <th>mp3-parent-root</th>
+        <th>mp2-parent-root</th>
+        <th>mp3</th>
+        <th>mp3-parent</th>
+        <th>array</th>
+        <th>mp1-parent-root</th>
+        <th>mp1</th>
+        <th>mp1-virt</th>
+        <th>mp1-parent</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">has_parent?</td>
+        <td class="metric best" style="color: #1a7f37" title="best">5,745,961.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,680,099</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,650,390.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.02x slower (± 1.2%)">5,618,768.1</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">5,595,086.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.04x slower (± 0.9%)">5,551,307.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.04x slower (± 1.4%)">5,543,382.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.04x slower (± 0.7%)">5,534,953.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.05x slower (± 0.7%)">5,489,010</td>
+        <td class="metric slower" style="color: #656d76" title="1.10x slower (± 1.1%)">5,203,719.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.14x slower (± 0.7%)">5,032,439.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.15x slower (± 1.1%)">4,986,437.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.16x slower (± 0.8%)">4,969,200.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.16x slower (± 1.1%)">4,966,875.5</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric slower" style="color: #656d76" title="19.53x slower (± 0.9%)">1,907,740.9</td>
+        <td class="metric slower" style="color: #656d76" title="19.48x slower (± 1.1%)">1,912,669.9</td>
+        <td class="metric slower" style="color: #656d76" title="17.17x slower (± 0.8%)">2,170,255.4</td>
+        <td class="metric slower" style="color: #656d76" title="17.40x slower (± 1.0%)">2,140,698.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="19.78x slower (± 1.5%)">1,884,037.9</td>
+        <td class="metric slower" style="color: #656d76" title="17.54x slower (± 1.0%)">2,124,135.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="19.99x slower (± 0.9%)">1,864,268.3</td>
+        <td class="metric slower" style="color: #656d76" title="17.66x slower (± 0.7%)">2,110,175.2</td>
+        <td class="metric slower" style="color: #656d76" title="17.82x slower (± 0.8%)">2,090,246.7</td>
+        <td class="metric slower" style="color: #656d76" title="8.63x slower (± 1.3%)">4,319,283</td>
+        <td class="metric slower" style="color: #656d76" title="17.51x slower (± 0.9%)">2,127,812</td>
+        <td class="metric slower" style="color: #656d76" title="12.01x slower (± 2.1%)">3,103,113.2</td>
+        <td class="metric slower" style="color: #656d76" title="17.47x slower (± 0.7%)">2,132,554.7</td>
+        <td class="metric slower" style="color: #656d76" title="11.89x slower (± 1.2%)">3,134,113.5</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.56x slower (± 1.3%)">9,916.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.58x slower (± 1.1%)">9,821.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.57x slower (± 1.6%)">9,899.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.61x slower (± 1.6%)">9,628.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.61x slower (± 2.4%)">9,650.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.61x slower (± 2.1%)">9,619.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.58x slower (± 1.5%)">9,818.1</td>
+        <td class="metric slower" style="color: #656d76" title="1.55x slower (± 1.3%)">9,987.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.58x slower (± 1.3%)">9,814.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.58x slower (± 1.4%)">9,802.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.58x slower (± 1.4%)">9,817.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.53x slower (± 2.6%)">10,127.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.59x slower (± 1.5%)">9,737.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.59x slower (± 2.6%)">9,751.7</td>
+      </tr>
+      <tr>
+        <td class="row-label">children</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.88x slower (± 1.7%)">9,766</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.19x slower (± 23.6%)">8,407.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.01x slower (± 2.7%)">9,163</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.13x slower (± 1.1%)">8,611.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.15x slower (± 2.9%)">8,565</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.12x slower (± 1.3%)">8,648.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.10x slower (± 1.4%)">8,756.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.86x slower (± 0.9%)">9,866.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.07x slower (± 1.4%)">8,868.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.04x slower (± 2.5%)">9,024.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.09x slower (± 0.7%)">8,805.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.87x slower (± 2.3%)">9,800.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.13x slower (± 1.4%)">8,642.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.07x slower (± 0.9%)">8,861.9</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestors</td>
+        <td class="metric slower" style="color: #656d76" title="1.69x slower (± 2.1%)">8,988.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.75x slower (± 5.2%)">8,659.6</td>
+        <td class="metric slower" style="color: #656d76" title="1.68x slower (± 1.5%)">9,036.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.74x slower (± 1.5%)">8,739.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.74x slower (± 2.1%)">8,722.3</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.76x slower (± 2.3%)">8,637.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.73x slower (± 2.2%)">8,790.1</td>
+        <td class="metric slower" style="color: #656d76" title="1.67x slower (± 1.8%)">9,062.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.69x slower (± 2.0%)">8,989.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.70x slower (± 1.7%)">8,922.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.76x slower (± 1.9%)">8,624.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.71x slower (± 2.6%)">8,858.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.83x slower (± 3.6%)">8,284.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.75x slower (± 2.4%)">8,678.6</td>
+      </tr>
+      <tr>
+        <td class="row-label">descendants</td>
+        <td class="metric slower" style="color: #656d76" title="1.30x slower (± 2.3%)">7,613.7</td>
+        <td class="metric slower" style="color: #656d76" title="1.33x slower (± 3.5%)">7,449.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.21x slower (± 2.3%)">8,159.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.35x slower (± 2.3%)">7,294.9</td>
+        <td class="metric slower" style="color: #656d76" title="1.37x slower (± 3.9%)">7,208</td>
+        <td class="metric slower" style="color: #656d76" title="1.36x slower (± 2.1%)">7,290.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.34x slower (± 2.3%)">7,357</td>
+        <td class="metric slower" style="color: #656d76" title="1.28x slower (± 2.3%)">7,741.6</td>
+        <td class="metric slower" style="color: #656d76" title="1.30x slower (± 2.1%)">7,599.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.86x slower (± 2.7%)">5,317.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.46x slower (± 1.8%)">6,764.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.43x slower (± 4.3%)">6,918.1</td>
+        <td class="metric slower" style="color: #656d76" title="1.48x slower (± 2.4%)">6,680.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.47x slower (± 2.0%)">6,732</td>
+      </tr>
+      <tr>
+        <td class="row-label">roots</td>
+        <td class="metric slower" style="color: #656d76" title="2.06x slower (± 2.3%)">9,930.4</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.09x slower (± 2.9%)">9,756.8</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.09x slower (± 2.5%)">9,788.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.22x slower (± 2.9%)">9,204</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.22x slower (± 5.4%)">9,201</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.20x slower (± 2.4%)">9,298.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.14x slower (± 1.7%)">9,547.7</td>
+        <td class="metric slower" style="color: #656d76" title="2.03x slower (± 1.6%)">10,040.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.08x slower (± 2.1%)">9,811.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.10x slower (± 1.8%)">9,734.5</td>
+        <td class="metric slower" style="color: #656d76" title="2.01x slower (± 1.7%)">10,180</td>
+        <td class="metric slower" style="color: #656d76" title="1.90x slower (± 1.5%)">10,752.8</td>
+        <td class="metric slower" style="color: #656d76" title="2.02x slower (± 1.9%)">10,101.7</td>
+        <td class="metric slower" style="color: #656d76" title="2.01x slower (± 1.3%)">10,178.7</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange</td>
+        <td class="metric slower" style="color: #656d76" title="2.10x slower (± 2.8%)">176.9</td>
+        <td class="metric slower" style="color: #656d76" title="2.11x slower (± 2.8%)">175.5</td>
+        <td class="metric slower" style="color: #656d76" title="2.05x slower (± 3.3%)">181</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.14x slower (± 2.9%)">173.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.23x slower (± 3.6%)">166.7</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.17x slower (± 3.5%)">171</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.25x slower (± 2.4%)">165</td>
+        <td class="metric slower" style="color: #656d76" title="2.07x slower (± 2.8%)">179</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.14x slower (± 3.5%)">173.6</td>
+        <td class="metric slower" style="color: #656d76" title="1.76x slower (± 5.2%)">211.2</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.16x slower (± 2.9%)">171.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.34x slower (± 3.2%)">277.6</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2.17x slower (± 3.5%)">170.7</td>
+        <td class="metric slower" style="color: #656d76" title="1.43x slower (± 3.8%)">259.9</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange_subtree</td>
+        <td class="metric slower" style="color: #656d76" title="1.28x slower (± 3.5%)">5,488.3</td>
+        <td class="metric slower" style="color: #656d76" title="1.32x slower (± 6.4%)">5,352.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.25x slower (± 3.7%)">5,643.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.35x slower (± 4.4%)">5,230.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.33x slower (± 4.8%)">5,294.5</td>
+        <td class="metric slower" style="color: #656d76" title="1.35x slower (± 4.1%)">5,234.8</td>
+        <td class="metric slower" style="color: #656d76" title="1.32x slower (± 3.4%)">5,339.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.27x slower (± 2.9%)">5,571.1</td>
+        <td class="metric slower" style="color: #656d76" title="1.29x slower (± 3.7%)">5,449.9</td>
+        <td class="metric slower worst" style="color: #cf222e" title="7.00x slower (± 23.4%)">1,007.4</td>
+        <td class="metric slower" style="color: #656d76" title="1.37x slower (± 4.8%)">5,127.6</td>
+        <td class="metric slower" style="color: #656d76" title="1.29x slower (± 4.0%)">5,459.2</td>
+        <td class="metric slower" style="color: #656d76" title="1.43x slower (± 7.0%)">4,933</td>
+        <td class="metric slower" style="color: #656d76" title="1.31x slower (± 4.9%)">5,384.8</td>
+      </tr>
+      <tr>
+        <td class="row-label">each.parent</td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">84.1</td>
+        <td></td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.03x slower (± 1.2%)">82.1</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">83.6</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">82.7</td>
+        <td class="metric best" style="color: #1a7f37" title="best">84.3</td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">84.1</td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">84.2</td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">82.7</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">83.3</td>
+      </tr>
+      <tr>
+        <td class="row-label">each.children</td>
+        <td></td>
+        <td class="metric best" style="color: #1a7f37" title="best">29,123</td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">28,400.8</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">28,587.5</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.04x slower (± 0.9%)">27,996.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">28,162.9</td>
+        <td></td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.05x slower (± 1.8%)">27,687.5</td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">28,689.2</td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">28,308.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">28,389.8</td>
+      </tr>
+      <tr>
+        <td class="row-label">includes(:children)</td>
+        <td></td>
+        <td class="metric slower" style="color: #656d76" title="1.10x slower (± 4.4%)">204.1</td>
+        <td></td>
+        <td class="metric slower" style="color: #656d76" title="1.09x slower (± 2.4%)">206.1</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.24x slower (± 8.3%)">180.7</td>
+        <td class="metric slower" style="color: #656d76" title="1.10x slower (± 2.4%)">205</td>
+        <td class="metric slower" style="color: #656d76" title="1.13x slower (± 3.5%)">199.6</td>
+        <td></td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">195.6</td>
+        <td></td>
+        <td class="metric slower" style="color: #656d76" title="1.11x slower (± 3.0%)">202</td>
+        <td></td>
+        <td class="metric slower worst" style="color: #cf222e" title="1.29x slower (± 4.6%)">173.7</td>
+        <td class="metric best" style="color: #1a7f37" title="best">224.8</td>
+      </tr>
+      </tbody>
+    </table>
+
+</body>
+</html>

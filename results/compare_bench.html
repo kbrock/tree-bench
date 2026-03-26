@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ancestry vs closure_tree</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #fff;
+      color: #1f2328;
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h1 { font-size: 1.5rem; font-weight: 600; }
+    h2 { font-size: 1.1rem; font-weight: 600; margin-top: 2rem; color: #656d76; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0.5rem 0 1.5rem;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.4rem 0.75rem;
+      text-align: right;
+      border-bottom: 1px solid #d1d9e0;
+    }
+    th {
+      font-weight: 600;
+      color: #656d76;
+      border-bottom: 2px solid #d1d9e0;
+    }
+    td.row-label {
+      text-align: left;
+      font-weight: 500;
+    }
+    td.metric { font-variant-numeric: tabular-nums; }
+    td.best { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>ancestry vs closure_tree</h1>
+    <h2>deep (ips)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>ancestry</th>
+        <th>closure_tree</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">root?</td>
+        <td class="metric best" title="best">4,619,328</td>
+        <td class="metric slower worst" title="1.17x slower (± 1.2%)">3,944,179</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric best" title="best">594,656.1</td>
+        <td class="metric slower worst" title="493.82x slower (± 10.1%)">1,204.2</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent</td>
+        <td class="metric best" title="best">10,189.4</td>
+        <td class="metric slower worst" title="1.10x slower (± 2.5%)">9,263.8</td>
+      </tr>
+      <tr>
+        <td class="row-label">children</td>
+        <td class="metric best" title="best">10,238.2</td>
+        <td class="metric slower worst" title="1.45x slower (± 2.6%)">7,055.9</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestors</td>
+        <td class="metric best" title="best">4,272.3</td>
+        <td class="metric slower worst" title="1.09x slower (± 1.9%)">3,928.6</td>
+      </tr>
+      <tr>
+        <td class="row-label">descendants</td>
+        <td class="metric best" title="best">5,174.2</td>
+        <td class="metric slower worst" title="1.90x slower (± 42.6%)">2,730.1</td>
+      </tr>
+      <tr>
+        <td class="row-label">roots</td>
+        <td class="metric best" title="best">10,648.5</td>
+        <td class="metric slower worst" title="1.19x slower (± 3.4%)">8,938</td>
+      </tr>
+      <tr>
+        <td class="row-label">leaf?</td>
+        <td class="metric best" title="best">10,263.4</td>
+        <td class="metric slower worst" title="1.22x slower (± 1.6%)">8,393.4</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange</td>
+        <td class="metric best" title="best">275.7</td>
+        <td class="metric slower worst" title="1.43x slower (± 32.1%)">193.4</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>deep (queries)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>ancestry</th>
+        <th>ancestry+assoc</th>
+        <th>closure_tree</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric best" style="color: #1a7f37" title="best">0</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">0</td>
+        <td class="metric slower" style="color: #656d76" title="Infx slower (± 0%)">1</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids cached</td>
+        <td class="metric best" style="color: #1a7f37" title="best">0</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">0</td>
+        <td class="metric slower" style="color: #656d76" title="Infx slower (± 0%)">1</td>
+      </tr>
+      <tr>
+        <td class="row-label">4.descendants</td>
+        <td class="metric slower" style="color: #656d76" title="1.50x slower (± 0%)">3</td>
+        <td class="metric slower" style="color: #656d76" title="1.50x slower (± 0%)">3</td>
+        <td class="metric best" style="color: #1a7f37" title="best">2</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>deep (rows)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>closure_tree</th>
+        <th>ancestry</th>
+        <th>ancestry+assoc</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">4.descendants</td>
+        <td class="metric best" style="color: #1a7f37" title="best">73</td>
+        <td class="metric slower" style="color: #656d76" title="1.03x slower (± 0%)">75</td>
+        <td class="metric slower" style="color: #656d76" title="1.03x slower (± 0%)">75</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>mixed (ips)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>ancestry</th>
+        <th>closure_tree</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">root?</td>
+        <td class="metric best" title="best">4,620,852.6</td>
+        <td class="metric slower worst" title="1.15x slower (± 1.2%)">4,010,146.9</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric best" title="best">3,148,183.9</td>
+        <td class="metric slower worst" title="2713.66x slower (± 19.3%)">1,160.1</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent</td>
+        <td class="metric best" title="best">10,047.5</td>
+        <td class="metric slower worst" title="1.08x slower (± 3.1%)">9,291.5</td>
+      </tr>
+      <tr>
+        <td class="row-label">children</td>
+        <td class="metric best" title="best">10,082.3</td>
+        <td class="metric slower worst" title="1.47x slower (± 1.4%)">6,843.9</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestors</td>
+        <td class="metric best" title="best">8,998.8</td>
+        <td class="metric slower worst" title="1.89x slower (± 3.1%)">4,765.6</td>
+      </tr>
+      <tr>
+        <td class="row-label">descendants</td>
+        <td class="metric best" title="best">6,749.1</td>
+        <td class="metric slower worst" title="1.57x slower (± 1.8%)">4,289.5</td>
+      </tr>
+      <tr>
+        <td class="row-label">roots</td>
+        <td class="metric best" title="best">10,702.6</td>
+        <td class="metric slower worst" title="1.20x slower (± 4.1%)">8,894.7</td>
+      </tr>
+      <tr>
+        <td class="row-label">leaf?</td>
+        <td class="metric best" title="best">10,509</td>
+        <td class="metric slower worst" title="1.28x slower (± 4.3%)">8,207.2</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange</td>
+        <td class="metric best" title="best">276.7</td>
+        <td class="metric slower worst" title="1.42x slower (± 30.7%)">195.2</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>mixed (queries)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>ancestry</th>
+        <th>ancestry+assoc</th>
+        <th>closure_tree</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric best" style="color: #1a7f37" title="best">0</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">0</td>
+        <td class="metric slower" style="color: #656d76" title="Infx slower (± 0%)">1</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids cached</td>
+        <td class="metric best" style="color: #1a7f37" title="best">0</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">0</td>
+        <td class="metric slower" style="color: #656d76" title="Infx slower (± 0%)">1</td>
+      </tr>
+      <tr>
+        <td class="row-label">4.descendants</td>
+        <td class="metric slower" style="color: #656d76" title="1.25x slower (± 0%)">5</td>
+        <td class="metric slower" style="color: #656d76" title="1.25x slower (± 0%)">5</td>
+        <td class="metric best" style="color: #1a7f37" title="best">4</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>mixed (rows)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>closure_tree</th>
+        <th>ancestry</th>
+        <th>ancestry+assoc</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">4.descendants</td>
+        <td class="metric best" style="color: #1a7f37" title="best">36</td>
+        <td class="metric slower" style="color: #656d76" title="1.11x slower (± 0%)">40</td>
+        <td class="metric slower" style="color: #656d76" title="1.11x slower (± 0%)">40</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>wide (ips)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>ancestry</th>
+        <th>closure_tree</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">root?</td>
+        <td class="metric best" title="best">4,677,234.4</td>
+        <td class="metric slower worst" title="1.18x slower (± 1.2%)">3,951,896</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric best" title="best">3,204,862.7</td>
+        <td class="metric slower worst" title="713.60x slower (± 26.0%)">4,491.1</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent</td>
+        <td class="metric best" title="best">10,067.5</td>
+        <td class="metric slower worst" title="1.09x slower (± 1.3%)">9,224</td>
+      </tr>
+      <tr>
+        <td class="row-label">children</td>
+        <td class="metric best" title="best">9,792.7</td>
+        <td class="metric slower worst" title="1.56x slower (± 1.9%)">6,292.8</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestors</td>
+        <td class="metric best" title="best">8,983.9</td>
+        <td class="metric slower worst" title="1.89x slower (± 3.1%)">4,765.1</td>
+      </tr>
+      <tr>
+        <td class="row-label">descendants</td>
+        <td class="metric best" title="best">6,959.9</td>
+        <td class="metric slower worst" title="1.35x slower (± 3.0%)">5,148.1</td>
+      </tr>
+      <tr>
+        <td class="row-label">roots</td>
+        <td class="metric best" title="best">10,779.4</td>
+        <td class="metric slower worst" title="1.21x slower (± 1.8%)">8,878.7</td>
+      </tr>
+      <tr>
+        <td class="row-label">leaf?</td>
+        <td class="metric best" title="best">10,484.5</td>
+        <td class="metric slower worst" title="1.28x slower (± 3.8%)">8,204.6</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange</td>
+        <td class="metric best" title="best">277.1</td>
+        <td class="metric slower worst" title="1.40x slower (± 33.4%)">197.4</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>wide (queries)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>ancestry</th>
+        <th>ancestry+assoc</th>
+        <th>closure_tree</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric best" style="color: #1a7f37" title="best">0</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">0</td>
+        <td class="metric slower" style="color: #656d76" title="Infx slower (± 0%)">1</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids cached</td>
+        <td class="metric best" style="color: #1a7f37" title="best">0</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">0</td>
+        <td class="metric slower" style="color: #656d76" title="Infx slower (± 0%)">1</td>
+      </tr>
+      <tr>
+        <td class="row-label">4.descendants</td>
+        <td class="metric slower" style="color: #656d76" title="1.25x slower (± 0%)">5</td>
+        <td class="metric slower" style="color: #656d76" title="1.25x slower (± 0%)">5</td>
+        <td class="metric best" style="color: #1a7f37" title="best">4</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>wide (rows)</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>closure_tree</th>
+        <th>ancestry</th>
+        <th>ancestry+assoc</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">4.descendants</td>
+        <td class="metric best" style="color: #1a7f37" title="best">20</td>
+        <td class="metric slower" style="color: #656d76" title="1.20x slower (± 0%)">24</td>
+        <td class="metric slower" style="color: #656d76" title="1.20x slower (± 0%)">24</td>
+      </tr>
+      </tbody>
+    </table>
+
+</body>
+</html>

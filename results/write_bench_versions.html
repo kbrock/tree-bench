@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Write Benchmarks — Version Comparison</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #fff;
+      color: #1f2328;
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h1 { font-size: 1.5rem; font-weight: 600; }
+    h2 { font-size: 1.1rem; font-weight: 600; margin-top: 2rem; color: #656d76; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0.5rem 0 1.5rem;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.4rem 0.75rem;
+      text-align: right;
+      border-bottom: 1px solid #d1d9e0;
+    }
+    th {
+      font-weight: 600;
+      color: #656d76;
+      border-bottom: 2px solid #d1d9e0;
+    }
+    td.row-label {
+      text-align: left;
+      font-weight: 500;
+    }
+    td.metric { font-variant-numeric: tabular-nums; }
+    td.best { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Write Benchmarks — Version Comparison</h1>
+    <h2>deep_pg</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>v4.1.0</th>
+        <th>v4.3.3</th>
+        <th>v5.0.0</th>
+        <th>v5.1.0</th>
+        <th>master</th>
+        <th>no-depth</th>
+        <th>with-depth</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">build tree</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">79</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">79</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">79</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">79</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">79</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">79</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">79</td>
+      </tr>
+      <tr>
+        <td class="row-label">insert leaf</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,609.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,464.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,537.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,549.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,520.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">4,051.5</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">move subtree</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,420.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,483.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,494.6</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,459.8</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,416.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,632.5</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">destroy leaf</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,906.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,962.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,922.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,891.6</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,906.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,039.1</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">parent=</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,406.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,457.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,498.7</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,418.6</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,422.6</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,606.7</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">parent_id=</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,907.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,941.8</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,964.8</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,871</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,912</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,018.5</td>
+        <td></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>mixed_pg</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>v4.1.0</th>
+        <th>v4.3.3</th>
+        <th>v5.0.0</th>
+        <th>v5.1.0</th>
+        <th>master</th>
+        <th>no-depth</th>
+        <th>with-depth</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">build tree</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">156</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">156</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">156</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">156</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">156</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">156</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">156</td>
+      </tr>
+      <tr>
+        <td class="row-label">insert leaf</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,809.7</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,786.1</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,867.8</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,672.1</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,847.6</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">4,137.4</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">move subtree</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,512.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,513.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,542.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,478.9</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,504.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,653.3</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">destroy leaf</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,067.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,085.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,034.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,977.1</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,027.8</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,112.3</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">parent=</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,512.1</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,508.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,543.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,455.7</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,506.9</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,648.1</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">parent_id=</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,976.9</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,973.6</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,986.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,932</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,967.6</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,070.6</td>
+        <td></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>wide_pg</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>v4.1.0</th>
+        <th>v4.3.3</th>
+        <th>v5.0.0</th>
+        <th>v5.1.0</th>
+        <th>master</th>
+        <th>no-depth</th>
+        <th>with-depth</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">build tree</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">605</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">605</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">605</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">605</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">605</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">605</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">605</td>
+      </tr>
+      <tr>
+        <td class="row-label">insert leaf</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,767.9</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,743</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,830.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,830.9</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">3,783.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">4,079.6</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">move subtree</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,379.5</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,569.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,523.1</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,511.7</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,476.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,681.4</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">destroy leaf</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,022.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,125.7</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,001.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,006.8</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,004.1</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,150.4</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">parent=</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,468.6</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,602.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,515.8</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,509.8</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,464.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,689.8</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="row-label">parent_id=</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,844.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,026.2</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,984.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,966.3</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">1,950.4</td>
+        <td class="metric same" style="color: #1a7f37" title="same-ish (within error)">2,041.1</td>
+        <td></td>
+      </tr>
+      </tbody>
+    </table>
+
+</body>
+</html>

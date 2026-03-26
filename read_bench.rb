@@ -22,7 +22,8 @@ TreeBench::Suite.configs(options).each do |config|
 
           x.report(operation: "has_parent?")      { node.has_parent? }     # pure ruby: no parse
           # x.report(operation: "is_root?")       { root.is_root? }      # pure ruby: same as has_parent?
-          x.report(operation: "ancestor_ids")     { node.ancestor_ids }   # pure ruby: parse
+          x.report(operation: "ancestor_ids")        { node.instance_variable_set(:@_ancestor_ids, nil); node.ancestor_ids }
+          x.report(operation: "ancestor_ids cached") { node.ancestor_ids }
           # x.report(operation: "path_ids")       { node.path_ids }      # pure ruby: ancestor_ids + [id]
           # x.report(operation: "depth")          { leaf.depth }         # pure ruby: ancestor_ids.size (revisit with depth_cache)
           x.report(operation: "parent")           { node.parent }        # sql: single record by id

@@ -20,12 +20,35 @@ if (idx = ARGV.index("--metrics"))
   metrics = ARGV.delete_at(idx).split(",")
 end
 
-# Build ancestry model (plain mp1, no cache_depth)
-ancestry_model = TreeBench.build_config!("mp1")
+# Build table once with mp3-virt (has virtual parent_id column + indexes).
+# Create 3 model classes on the same table with different has_ancestry options:
+#   AncestryBase  — mp3, no associations (scope-based)
+#   AncestryAssoc — mp3-virt, with has_many :children / belongs_to :parent
+#   ClosureTreeNode — separate table, closure_tree gem
+ancestry_table_model = TreeBench.build_config!("mp3-virt")
 
-# Build identical trees in both models
+# Base ancestry model — same table, no associations
+Object.send(:remove_const, :AncestryBase) if defined?(::AncestryBase)
+ancestry_base = Class.new(ActiveRecord::Base) { self.table_name = "ancestry_nodes" }
+Object.const_set(:AncestryBase, ancestry_base)
+ancestry_base.has_ancestry(format: :materialized_path3, cache_depth: true)
+
+# Assoc ancestry model — same table, with associations
+ancestry_assoc = ancestry_table_model
+
 puts "Building ancestry trees..."
-ancestry_trees = TreeBench::TreeShapes.build_all(ancestry_model)
+ancestry_trees = TreeBench::TreeShapes.build_all(ancestry_assoc)
+# Reload base model nodes to pick up the same data
+ancestry_base_trees = {}
+TreeBench::TreeShapes::SHAPES.each do |shape|
+  at = ancestry_trees[shape]
+  ancestry_base_trees[shape] = {
+    root: ancestry_base.find(at[:root].id),
+    mid:  ancestry_base.find(at[:mid].id),
+    leaf: ancestry_base.find(at[:leaf].id),
+    model: ancestry_base,
+  }
+end
 
 puts "Building closure_tree trees..."
 ct_trees = {}
@@ -40,20 +63,21 @@ end
 
 # Compare read operations
 TreeBench::TreeShapes::SHAPES.each do |shape|
-  at = ancestry_trees[shape]
+  ab = ancestry_base_trees[shape]  # ancestry without associations
+  aa = ancestry_trees[shape]       # ancestry with associations
   ct = ct_trees[shape]
 
-  # Ancestry nodes
-  a_node = at[:mid]
-  a_root = at[:root]
-  a_leaf = at[:leaf]
-  a_klass = at[:model]
+  # Base ancestry (scopes only)
+  a_node = ab[:mid] ; a_leaf = ab[:leaf] ; a_klass = ab[:model]
+  # Assoc ancestry (has_many :children, belongs_to :parent)
+  v_node = aa[:mid] ; v_leaf = aa[:leaf] ; v_klass = aa[:model]
+  # Closure tree
+  c_node = ct[:mid] ; c_leaf = ct[:leaf] ; c_klass = ct[:model]
 
-  # Closure tree nodes
-  c_node = ct[:mid]
-  c_root = ct[:root]
-  c_leaf = ct[:leaf]
-  c_klass = ct[:model]
+  # Grab 4 children of root for preload benchmarks — order by id for consistency
+  a_depth1 = ab[:root].children.order(:id).limit(4).to_a
+  v_depth1 = aa[:root].children.order(:id).limit(4).to_a
+  c_depth1 = ct[:root].children.order(:id).limit(4).to_a
 
   Benchmark.items(metrics: metrics) do |x|
     x.compare_by :shape, :operation
@@ -61,36 +85,73 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
     x.configure(force: true) if force
     x.metadata(db: TreeBench.db_name)
 
-    # NOTE: closure_tree children/ancestors/descendants are has_many associations
-    # that cache after first load. ancestry (without parent: true) uses scopes
-    # that return fresh relations each time. This is a real difference —
-    # closure_tree wins on repeated access within a request.
-    # We benchmark first-access (cold) by resetting associations each iteration.
-
+    # -- ancestry (mp3, scope-based — no has_many associations) --
     x.metadata(gem: "ancestry", shape: shape) do
-      x.report(operation: "root?")          { a_node.root? }            # pure ruby
-      x.report(operation: "ancestor_ids")   { a_node.ancestor_ids }     # pure ruby: parse string
-      x.report(operation: "parent")         { a_node.parent }           # sql: find by id
-      x.report(operation: "children")       { a_node.children.to_a }    # sql: scope (no cache)
-      x.report(operation: "ancestors")      { a_node.ancestors.to_a }   # sql: WHERE id IN (...)
-      x.report(operation: "descendants")    { a_node.descendants.to_a } # sql: WHERE ancestry LIKE
-      x.report(operation: "roots")          { a_klass.roots.to_a }
-      x.report(operation: "leaf?")          { a_leaf.leaf? }            # sql: children.exists?
-      x.report(operation: "arrange")        { a_klass.arrange }         # 1 query + ruby sort
+      x.report(operation: "root?")               { a_node.root? }
+      x.report(operation: "ancestor_ids")         { a_node.instance_variable_set(:@_ancestor_ids, nil); a_node.ancestor_ids }
+      x.report(operation: "ancestor_ids cached")  { a_node.ancestor_ids }
+      x.report(operation: "parent")               { a_node.parent }
+      x.report(operation: "children")             { a_node.children.to_a }             # scope: fresh relation each call
+      x.report(operation: "ancestors")            { a_node.ancestors.to_a }
+      x.report(operation: "descendants")          { a_node.descendants.to_a }
+      x.report(operation: "roots")                { a_klass.roots.to_a }
+      x.report(operation: "leaf?")                { a_leaf.leaf? }
+      x.report(operation: "arrange")              { a_klass.arrange }
+      # no descendants association — loads 4 nodes then queries descendants individually
+      x.report(operation: "4.descendants") do
+        a_klass.where(id: a_depth1.map(&:id)).each { |n| n.descendants.to_a }
+      end
     end
 
+    # -- ancestry + associations (mp3-virt, virtual parent_id — has_many :children) --
+    x.metadata(gem: "ancestry+assoc", shape: shape) do
+      x.report(operation: "root?")               { v_node.root? }
+      x.report(operation: "ancestor_ids")         { v_node.instance_variable_set(:@_ancestor_ids, nil); v_node.ancestor_ids }
+      x.report(operation: "ancestor_ids cached")  { v_node.ancestor_ids }
+      x.report(operation: "parent")               { v_node.association(:parent).reset; v_node.parent }
+      x.report(operation: "children")             { v_node.association(:children).reset; v_node.children.to_a }  # cold: association reset
+      x.report(operation: "children cached")      { v_node.children.to_a }                                      # warm: AR cache hit
+      x.report(operation: "ancestors")            { v_node.ancestors.to_a }
+      x.report(operation: "descendants")          { v_node.descendants.to_a }
+      x.report(operation: "descendants cached")   { v_node.descendants.to_a }                                   # scope returns new relation — verifies no caching
+      x.report(operation: "roots")                { v_klass.roots.to_a }
+      x.report(operation: "leaf?")                { v_leaf.leaf? }
+      x.report(operation: "arrange")              { v_klass.arrange }
+      # preload: has has_many :children, so preload works (2 queries)
+      x.report(operation: "4.preload(:children)") do
+        v_klass.where(id: v_depth1.map(&:id)).preload(:children).each { |n| n.children.to_a }
+      end
+      # no descendants association — loads 4 nodes then queries descendants individually
+      x.report(operation: "4.descendants") do
+        v_klass.where(id: v_depth1.map(&:id)).each { |n| n.descendants.to_a }
+      end
+    end
+
+    # -- closure_tree --
     x.metadata(gem: "closure_tree", shape: shape) do
-      x.report(operation: "root?")          { c_node.root? }                                                    # pure ruby: parent_id.nil?
-      x.report(operation: "ancestor_ids")   { c_node.association(:ancestor_hierarchies).reset; c_node.ancestor_ids }  # sql: hierarchy table
-      x.report(operation: "parent")         { c_node.association(:parent).reset; c_node.parent }                      # sql: find by parent_id
-      x.report(operation: "children")       { c_node.association(:children).reset; c_node.children.to_a }             # sql: has_many (cached after this)
-      x.report(operation: "ancestors")      { c_node.association(:self_and_ancestors).reset; c_node.ancestors.to_a }  # sql: JOIN hierarchy
-      x.report(operation: "descendants")    { c_node.association(:self_and_descendants).reset; c_node.descendants.to_a } # sql: JOIN hierarchy
-      x.report(operation: "roots")          { c_klass.roots.to_a }
-      x.report(operation: "leaf?")          { c_node.association(:children).reset; c_leaf.leaf? }                      # sql: children.empty?
-      x.report(operation: "arrange")        { c_klass.hash_tree }                                                     # 1 query + ruby sort
+      x.report(operation: "root?")               { c_node.root? }
+      x.report(operation: "ancestor_ids")         { c_node.association(:ancestor_hierarchies).reset; c_node.ancestor_ids }
+      x.report(operation: "ancestor_ids cached")  { c_node.ancestor_ids }
+      x.report(operation: "parent")               { c_node.association(:parent).reset; c_node.parent }
+      x.report(operation: "children")             { c_node.association(:children).reset; c_node.children.to_a }  # cold: association reset
+      x.report(operation: "children cached")      { c_node.children.to_a }                                      # warm: AR cache hit
+      x.report(operation: "ancestors")            { c_node.association(:self_and_ancestors).reset; c_node.ancestors.to_a }
+      x.report(operation: "descendants")          { c_node.association(:self_and_descendants).reset; c_node.descendants.to_a }
+      x.report(operation: "descendants cached")   { c_node.descendants.to_a }                                   # warm: has_many :through cache
+      x.report(operation: "roots")                { c_klass.roots.to_a }
+      x.report(operation: "leaf?")                { c_node.association(:children).reset; c_leaf.leaf? }
+      x.report(operation: "arrange")              { c_klass.hash_tree }
+      # preload: CT has has_many for children and descendants (2 queries each)
+      x.report(operation: "4.preload(:children)") do
+        c_klass.where(id: c_depth1.map(&:id)).preload(:children).each { |n| n.children.to_a }
+      end
+      # CT descendants — same N+1 pattern as ancestry (preload(:self_and_descendants) errors)
+      x.report(operation: "4.descendants") do
+        c_depth1.each { |n| n.association(:self_and_descendants).reset; n.descendants.to_a }
+      end
     end
 
     x.save_file $PROGRAM_NAME.sub(".rb", ".json")
+    x.save_sql $PROGRAM_NAME.sub(".rb", ".sql")
   end
 end
