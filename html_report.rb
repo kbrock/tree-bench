@@ -77,7 +77,7 @@ REPORTS.each do |json_file, opts|
     column: opts[:column],
   )
 
-  out_file = "results/#{File.basename(json_file, '.json')}.html"
+  out_file = "results/#{File.basename(json_file, '.json')}_report.html"
   File.write(out_file, html)
   puts "#{json_file} -> #{out_file}"
 end

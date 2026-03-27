@@ -57,9 +57,13 @@ Diffs SQL output files to see exactly what changed between versions or configs.
 ruby sql_diff.rb read_bench-mp1-v5.sql read_bench-mp1-current.sql
 ```
 
+## Results
+
+See [results](results/) for the latest benchmark data.
+
 ## Findings
 
-See [FINDINGS.md](FINDINGS.md) for benchmark observations and cross-gem comparison data.
+See findings.md for benchmark observations and cross-gem comparison data.
 
 ## Setup
 
