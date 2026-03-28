@@ -14,7 +14,7 @@ Adding `parent: true` (enabling `has_many :children`, `belongs_to :parent`) cost
 
 ### Depth cache has negligible read/write impact
 
-<5% difference on most operations with vs without `cache_depth: true`. Same query counts. The value is for depth-limited scope queries — not yet benchmarked.
+<5% difference on most operations with vs without `cache_depth: true`. Same query counts. Depth-limited scope benchmarks (e.g., "all nodes at depth 3") are not yet tested — that's the intended use case for this feature. If depth-limited queries don't benefit either, `cache_depth` may be a candidate for deprecation.
 
 ### Version-over-version (v4.1 through master)
 
@@ -22,53 +22,75 @@ Query counts unchanged across all ancestry versions. IPS regressions traced to `
 
 ## ancestry vs closure_tree
 
-830 nodes, cold-access (association caches reset between iterations).
+830 nodes, three configurations:
+- **ancestry** — mp3 format, scope-based (no AR associations)
+- **ancestry+assoc** — mp3 with virtual parent_id, enabling `has_many :children` / `belongs_to :parent`
+- **closure_tree** — hierarchy table with AR associations
 
-### Read Operations (wide shape, IPS)
+Cold access: association caches reset between iterations.
 
-| Operation | ancestry | closure_tree | Notes |
-|-----------|----------|--------------|-------|
-| root? | 4,476,619 | 4,019,158 | Both pure Ruby |
-| ancestor_ids | 3,234,780 | 1,496 | ancestry: pure Ruby parse. CT: must query hierarchy table |
-| parent | 9,162 | 9,220 | Tie. Both 1 query |
-| children | 9,979 | 6,393 | Both 1 query. Association overhead on cold access; CT caches on repeat |
-| ancestors | 9,178 | 4,830 | Both 1 query. JOIN through hierarchy table is heavier than `WHERE id IN (...)` |
-| descendants | 6,325 | 5,374 | Both 1 query. LIKE vs JOIN. CT may win on very deep trees |
-| roots | 10,684 | 8,866 | Both 1 query |
-| leaf? | 10,592 | 8,619 | Both 1 query (children exists check) |
-| arrange | 318 | 407 | CT uses ordered query via hierarchy table. ancestry sorts in Ruby |
+### Caching behavior
 
-Query counts identical (1 each) except `ancestor_ids`: ancestry 0, CT 1.
+| Operation | ancestry | ancestry+assoc | closure_tree |
+|-----------|----------|----------------|--------------|
+| ancestor_ids (uncached) | 3.1M i/s (parse string) | 3.1M i/s | 1.2K i/s (queries hierarchy table) |
+| ancestor_ids (cached) | 38M i/s (ivar) | 38M i/s | 1.2K i/s (no ivar cache, re-queries) |
+| children (cached) | n/a (scope, no cache) | 3.3M i/s (AR assoc cache) | 3.3M i/s (AR assoc cache) |
+| descendants (cached) | re-queries | re-queries | re-queries |
 
-### Ratios across tree shapes
+ancestry's `ancestor_ids` ivar cache is a significant advantage for code paths that call it repeatedly (e.g., `parent_id`, `root_id`, `depth` all call `ancestor_ids`). closure_tree could benefit from similar caching.
 
-| Operation | wide | deep | mixed |
-|-----------|------|------|-------|
-| ancestor_ids | 2162x | 491x | 2252x |
-| children | 1.6x | 1.4x | 1.4x |
-| ancestors | 1.9x | 1.1x | 1.8x |
-| descendants | 1.2x | 1.4x | 1.6x |
-| arrange | 0.8x | 0.8x | 0.8x |
+Descendants are not cached by either library — both return fresh relations on every call.
 
-`ancestors` narrows on deep trees (1.9x→1.1x) — deeper ancestor chain means `WHERE id IN (25 ids)` gets heavier while CT's hierarchy JOIN stays constant.
+### Multi-node operations (preloading)
+
+| Operation | ancestry | ancestry+assoc | closure_tree |
+|-----------|----------|----------------|--------------|
+| 4.preload(:children) | n/a (no assoc) | 2 queries | 2 queries |
+| 4.descendants | 5 queries | 5 queries | 2-4 queries |
+
+closure_tree's `self_and_descendants` association enables fewer queries when loading descendants for multiple nodes. However, `preload(:self_and_descendants)` currently errors with a SQL generation issue — an opportunity for closure_tree to fix and realize this advantage.
+
+Both libraries support `preload(:children)` when associations are configured (ancestry with `parent: true`, closure_tree natively).
+
+### Read operations (wide shape, IPS)
+
+| Operation | ancestry | ancestry+assoc | closure_tree |
+|-----------|----------|----------------|--------------|
+| root? | 5.1M | 5.1M | 3.9M |
+| ancestor_ids | 3.1M | 3.1M | 1.3K |
+| parent | 10.0K | 10.0K | 9.3K |
+| children | 9.2K | 8.8K | 6.4K |
+| ancestors | 8.8K | 9.0K | 1.3K |
+| descendants | 7.5K | 7.5K | 4.3K |
+| roots | 9.4K | 9.5K | 9.0K |
+| leaf? | 10.4K | 10.1K | 8.6K |
+| arrange | 277 | 278 | 185 |
+
+Query counts are identical (1 each) for most operations. The IPS differences reflect query complexity (JOIN through hierarchy table vs LIKE/IN), not query count.
+
+### Deep trees
+
+On deep trees (50 levels), `ancestors` narrows significantly — ancestry's `WHERE id IN (25 ids)` gets heavier while closure_tree's hierarchy JOIN stays constant. `descendants` shows a similar pattern.
 
 ### Architectural differences
 
-- **Ordered traversal** — CT's hierarchy table stores generation order. ancestry would need a position column.
-- **Deep tree descendants** — JOIN vs LIKE. At extreme depth, JOINs scale better than string matching.
-- **Eager loading** — CT's `ancestors`/`descendants` are `has_many :through` — `includes` works natively. ancestry's are scopes — `includes` doesn't apply (except `children` with `parent: true`).
-- **Write efficiency** — ancestry: single column UPDATE. CT: hierarchy table maintenance. ancestry is structurally cheaper.
-- **Storage** — ancestry: O(n) single column. CT: O(n × depth) hierarchy table rows.
+- **Ordered traversal** — closure_tree's hierarchy table stores generation order. ancestry would need a position column.
+- **Deep tree scaling** — JOIN vs LIKE. At extreme depth, JOINs scale better than string matching.
+- **Eager loading** — closure_tree's `ancestors`/`descendants` are `has_many :through` — `preload` could work natively (once the SQL generation bug is fixed). ancestry's are scopes — `preload` doesn't apply (except `children` with `parent: true`).
+- **Write efficiency** — ancestry: single column UPDATE. closure_tree: hierarchy table maintenance. ancestry is structurally cheaper for writes.
+- **Storage** — ancestry: O(n) single column. closure_tree: O(n × depth) hierarchy table rows.
 
 ### Where each can improve
 
-**ancestry:** ancestor_ids caching (avoid re-parsing), arrange via DB-ordered query, eager loading for descendants/ancestors.
+**ancestry:** eager loading for descendants/ancestors (would need a descendants association or scope-preloader), arrange via DB-ordered query.
 
-**closure_tree:** ancestor_ids caching (avoid re-querying), lighter cold-access path for associations, write overhead from hierarchy table maintenance.
+**closure_tree:** ancestor_ids caching (ivar cache would avoid re-querying hierarchy table), fix `preload(:self_and_descendants)` SQL generation, lighter cold-access path for associations.
 
 ## Methodology
 
-- `compare_bench.rb` / `read_bench.rb` / `write_bench.rb` in tree-bench repository
+- `read_bench.rb` / `write_bench.rb` / `compare_bench.rb` in tree-bench repository
 - Cold access: associations reset before each iteration
-- ancestry uses mp1 config (simplest baseline) unless noted
+- ancestry uses mp3 config with virtual parent_id for compare_bench
 - Same tree shapes built in both models via shared `TreeShapes` builder
+- Results: [results/](results/)
