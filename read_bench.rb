@@ -1,6 +1,8 @@
 require_relative "lib/tree_bench"
 
 options = TreeBench::Suite.parse!
+target_dir = "results/#{options[:scale] || 1}"
+`mkdir -p #{target_dir}`
 TreeBench.connect!
 
 TreeBench::Suite.configs(options).each do |config|
@@ -9,7 +11,7 @@ TreeBench::Suite.configs(options).each do |config|
       TreeBench::Suite.setup(x, options)
 
       model = TreeBench.build_config!(config)
-      trees = TreeBench::TreeShapes.build_all(model)
+      trees = TreeBench::TreeShapes.build_all(model, scale: options[:scale] || 1)
 
       trees.each do |shape, t|
         x.metadata(config: config, shape: shape) do
@@ -86,8 +88,9 @@ TreeBench::Suite.configs(options).each do |config|
         end
       end
 
-      x.save_file $PROGRAM_NAME.sub(".rb", "_#{options[:suite]}.json")
-      x.save_sql $PROGRAM_NAME.sub(".rb", "-#{config}-#{options[:version]}.sql")
+      base = File.basename($PROGRAM_NAME, '.rb')
+      x.save_file "#{target_dir}/#{base}_#{options[:suite]}.json"
+      x.save_sql "#{target_dir}/#{base}-#{config}-#{options[:version]}.sql"
     end
   rescue => e
     warn "SKIP #{config}: #{e.message}"

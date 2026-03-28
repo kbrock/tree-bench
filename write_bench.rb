@@ -1,6 +1,8 @@
 require_relative "lib/tree_bench"
 
 options = TreeBench::Suite.parse!
+target_dir = "results/#{options[:scale] || 1}"
+`mkdir -p #{target_dir}`
 TreeBench.connect!
 
 TreeBench::Suite.configs(options).each do |config|
@@ -16,13 +18,14 @@ TreeBench::Suite.configs(options).each do |config|
     TreeBench::TreeShapes::SHAPES.each do |shape|
       x.metadata(config: config, shape: shape) do
         x.report(operation: "build tree") do
-          trees[shape] = TreeBench::TreeShapes.build(shape, model)
+          trees[shape] = TreeBench::TreeShapes.build(shape, model, scale: options[:scale] || 1)
         end
       end
     end
 
-    x.save_file $PROGRAM_NAME.sub(".rb", "_#{options[:suite]}.json")
-    x.save_sql $PROGRAM_NAME.sub(".rb", "-#{config}-#{options[:version]}.sql")
+    base = File.basename($PROGRAM_NAME, '.rb')
+    x.save_file "#{target_dir}/#{base}_#{options[:suite]}.json"
+    x.save_sql "#{target_dir}/#{base}-#{config}-#{options[:version]}.sql"
   end
 
   # CRUD operations — all shapes already coexist in the table from above.
@@ -76,8 +79,9 @@ TreeBench::Suite.configs(options).each do |config|
       end
     end
 
-    x.save_file $PROGRAM_NAME.sub(".rb", "_#{options[:suite]}.json")
-    x.save_sql $PROGRAM_NAME.sub(".rb", "-#{config}-#{options[:version]}.sql")
+    base = File.basename($PROGRAM_NAME, '.rb')
+    x.save_file "#{target_dir}/#{base}_#{options[:suite]}.json"
+    x.save_sql "#{target_dir}/#{base}-#{config}-#{options[:version]}.sql"
   end
 
   rescue => e

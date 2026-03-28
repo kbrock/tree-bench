@@ -1,6 +1,6 @@
 # Benchmark Findings
 
-Observations from benchmarking tree gems. PostgreSQL, Ruby 4.0.1, Rails 7.2, 830 nodes.
+Observations from benchmarking tree gems. PostgreSQL, Ruby 4.0.1, Rails 7.2. Scale 1 (~830 nodes), scale 10 (~7,800 nodes).
 
 ## General Observations
 
@@ -72,6 +72,42 @@ Query counts are identical (1 each) for most operations. The IPS differences ref
 ### Deep trees
 
 On deep trees (50 levels), `ancestors` narrows significantly — ancestry's `WHERE id IN (25 ids)` gets heavier while closure_tree's hierarchy JOIN stays constant. `descendants` shows a similar pattern.
+
+### At scale (7,800 nodes)
+
+Running with `--scale 10` (~7,800 rows vs ~830) shifts several results. Ancestry still leads on most single-node reads, but the gap narrows and closure_tree pulls ahead on tree-wide operations like `arrange` and multi-node `descendants`.
+
+#### Wide shape (scale 10 IPS)
+
+| Operation       | ancestry     | ancestry+assoc | closure_tree | Notes                            |
+|-----------------|--------------|----------------|--------------|----------------------------------|
+| ancestor_ids    | 3.1M         | 3.0M           | 5.2K         | ancestry: string parse, no query |
+| parent          | 9.8K         | 9.5K           | 9.2K         |                                  |
+| children        | 9.0K         | 8.5K           | 6.2K         |                                  |
+| ancestors       | 8.6K         | 8.3K           | 5.2K         | changed (CT was 1.3K at s1)     |
+| descendants     | 7.3K         | 7.1K           | 5.1K         | changed (CT was 4.3K at s1)     |
+| roots           | 6.5K         | 6.4K           | 6.6K         | changed (ancestry led at s1)    |
+| arrange         | 27.5         | 29.2           | 32.1         | changed (ancestry led at s1)    |
+| 4.descendants   | 1.1K         | 1.4K           | 1.4K         |                                  |
+
+#### Deep shape (scale 10 IPS)
+
+| Operation       | ancestry     | ancestry+assoc | closure_tree | Notes                            |
+|-----------------|--------------|----------------|--------------|----------------------------------|
+| children        | 8.1K         | 7.2K           | 5.2K         |                                  |
+| ancestors       | 4.5K         | 2.2K           | 1.6K         | all slower — deep IN/JOIN cost   |
+| descendants     | 1.9K         | 1.8K           | 397          |                                  |
+| arrange         | 28.2         | 28.0           | 32.9         | changed (ancestry led at s1)    |
+| 4.descendants   | 312          | 576            | 661          | changed (ancestry led at s1)    |
+
+#### What changed at scale
+
+- **`arrange`** — closure_tree's hierarchy JOIN is more efficient for full-table arrange at 7,800 rows.
+- **`roots`** — at 830 rows ancestry led; at 7,800 both return ~6.5K i/s.
+- **`4.descendants`** — closure_tree's association-based preloading matches or beats ancestry's 5-query approach.
+- **CT `ancestors`** — 1.3K → 5.2K i/s on wide. The hierarchy table JOIN benefits from larger table statistics and better query plans.
+- **Deep descendants** — at 50 levels, ancestry's LIKE is still 5x faster than CT's hierarchy JOIN.
+- **Build time** — ancestry: 2.6s, closure_tree: 8.9s (3.4x slower due to hierarchy table maintenance).
 
 ### Architectural differences
 

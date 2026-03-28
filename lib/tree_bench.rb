@@ -155,6 +155,7 @@ module TreeBench
         opts.on("--all", "Run all configs") { options[:all] = true }
         opts.on("--force", "Re-run even if results exist") { options[:force] = true }
         opts.on("--metrics METRICS", "Metrics: queries,rows,ips (default: all)") { |v| options[:metrics] = v.split(",") }
+        opts.on("--scale N", Integer, "Scale tree sizes by N (default: 1)") { |v| options[:scale] = v }
       end.parse!
       options
     end
@@ -199,13 +200,13 @@ module TreeBench
     SHAPES = %w[wide deep mixed].freeze
 
     # Build all shapes into the same table. Returns { "wide" => {root:, mid:, leaf:, model:}, ... }
-    # All shapes coexist — gives ~814 rows total for realistic index behavior.
-    def self.build_all(model)
+    # All shapes coexist — gives ~814 rows at scale=1 for realistic index behavior.
+    def self.build_all(model, scale: 1)
       trees = {}
       SHAPES.each do |shape|
         before = model.count
         start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        trees[shape] = send(:"build_#{shape}", model)
+        trees[shape] = send(:"build_#{shape}", model, scale: scale)
         elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
         added = model.count - before
         puts "  #{shape}: #{added} records in #{'%.1f' % elapsed}s"
@@ -213,17 +214,19 @@ module TreeBench
       trees
     end
 
-    def self.build(shape, model)
-      send(:"build_#{shape}", model)
+    def self.build(shape, model, scale: 1)
+      send(:"build_#{shape}", model, scale: scale)
     end
 
-    # 1 root, 100 children, 5 grandchildren each = 601 nodes
-    def self.build_wide(model)
+    # 1 root, 100*scale children, 5 grandchildren each = 1+600*scale nodes
+    def self.build_wide(model, scale: 1)
       root = model.create!(name: "root")
       mid = nil
-      100.times do |i|
+      children_count = 100 * scale
+      mid_idx = children_count / 2
+      children_count.times do |i|
         child = model.create!(name: "child_#{i}", parent: root)
-        mid = child if i == 50
+        mid = child if i == mid_idx
         5.times do |j|
           model.create!(name: "grandchild_#{i}_#{j}", parent: child)
         end
@@ -232,31 +235,37 @@ module TreeBench
       { root: root.reload, mid: mid.reload, leaf: leaf.reload, model: model }
     end
 
-    # 1 root, 50 levels deep, 1-2 children per level ~75 nodes
-    def self.build_deep(model)
+    # 1 root, 50 levels deep, scale siblings at even levels = 50+25*scale nodes
+    def self.build_deep(model, scale: 1)
       root = model.create!(name: "root")
       node = root
       mid = nil
       50.times do |i|
         child = model.create!(name: "deep_#{i}", parent: node)
-        model.create!(name: "deep_#{i}_sib", parent: node) if i.even?
+        if i.even?
+          scale.times do |s|
+            model.create!(name: "deep_#{i}_sib#{s}", parent: node)
+          end
+        end
         mid = child if i == 25
         node = child
       end
       { root: root.reload, mid: mid.reload, leaf: node.reload, model: model }
     end
 
-    # 3 roots, 5 children each, 3 grandchildren each, 2 great-grandchildren each = ~138 nodes
-    def self.build_mixed(model)
+    # 3*scale roots, 5 children each, 3 grandchildren each, 2 great-grandchildren each = 51*scale nodes
+    def self.build_mixed(model, scale: 1)
       roots = []
       mid = nil
       leaf = nil
-      3.times do |r|
+      root_count = 3 * scale
+      mid_root = root_count / 2
+      root_count.times do |r|
         root = model.create!(name: "root_#{r}")
         roots << root
         5.times do |c|
           child = model.create!(name: "child_#{r}_#{c}", parent: root)
-          mid = child if r == 1 && c == 2
+          mid = child if r == mid_root && c == 2
           3.times do |g|
             grandchild = model.create!(name: "grandchild_#{r}_#{c}_#{g}", parent: child)
             2.times do |gg|

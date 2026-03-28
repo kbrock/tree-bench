@@ -37,7 +37,10 @@ ancestry_base.has_ancestry(format: :materialized_path3, cache_depth: true)
 ancestry_assoc = ancestry_table_model
 
 puts "Building ancestry trees..."
-ancestry_trees = TreeBench::TreeShapes.build_all(ancestry_assoc)
+scale = (ARGV.delete("--scale") ? ARGV.shift.to_i : 1)
+target_dir = "results/#{scale}"
+`mkdir -p #{target_dir}`
+ancestry_trees = TreeBench::TreeShapes.build_all(ancestry_assoc, scale: scale)
 # Reload base model nodes to pick up the same data
 ancestry_base_trees = {}
 TreeBench::TreeShapes::SHAPES.each do |shape|
@@ -55,7 +58,7 @@ ct_trees = {}
 TreeBench::TreeShapes::SHAPES.each do |shape|
   before = ClosureTreeNode.count
   start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-  ct_trees[shape] = TreeBench::TreeShapes.build(shape, ClosureTreeNode)
+  ct_trees[shape] = TreeBench::TreeShapes.build(shape, ClosureTreeNode, scale: scale)
   elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
   added = ClosureTreeNode.count - before
   puts "  #{shape}: #{added} records in #{'%.1f' % elapsed}s"
@@ -151,7 +154,8 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
       end
     end
 
-    x.save_file $PROGRAM_NAME.sub(".rb", ".json")
-    x.save_sql $PROGRAM_NAME.sub(".rb", ".sql")
+    base = File.basename($PROGRAM_NAME, '.rb')
+    x.save_file "#{target_dir}/#{base}.json"
+    x.save_sql "#{target_dir}/#{base}.sql"
   end
 end
