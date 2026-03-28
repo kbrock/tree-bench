@@ -12,9 +12,19 @@ Observations from benchmarking tree gems. PostgreSQL, Ruby 4.0.1, Rails 7.2. Sca
 
 Adding `parent: true` (enabling `has_many :children`, `belongs_to :parent`) costs ~5% on most operations. `arrange_subtree` drops 25% — worth investigating. The payoff: `includes(:parent)` is 16x faster than N+1 `each.parent`.
 
-### Depth cache has negligible read/write impact
+### Depth cache matters for depth-limited queries
 
-<5% difference on most operations with vs without `cache_depth: true`. Same query counts. Depth-limited scope benchmarks (e.g., "all nodes at depth 3") are not yet tested — that's the intended use case for this feature. If depth-limited queries don't benefit either, `cache_depth` may be a candidate for deprecation.
+<5% difference on standard operations (descendants, ancestors, etc.) with vs without `cache_depth: true`. Same query counts. But depth-limited scopes show the real value:
+
+Without `cache_depth` (computed from ancestry string):
+- `at_depth(3)` — **Seq Scan**, computes `LENGTH(ancestry) - LENGTH(REPLACE(ancestry,'/',''))` per row
+- `descendants.at_depth(+1)` — ancestry index only, computed depth as heap filter
+
+With `cache_depth: true` (physical column + index):
+- `at_depth(3)` — **Bitmap Index Scan** on `ancestry_depth` column
+- `descendants.at_depth(+1)` — **BitmapAnd** combining depth index + ancestry index
+
+At 7,800 rows, `at_depth(3)` returns 911 rows. Without the depth column, postgres scans the entire table computing depth per row. With it, it's a direct index lookup. The depth column earns its keep for any query that filters by depth — keep `cache_depth` for applications that use `at_depth`, `to_depth`, or depth-limited descendant queries.
 
 ### Version-over-version (v4.1 through master)
 

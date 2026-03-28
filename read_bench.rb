@@ -46,6 +46,12 @@ TreeBench::Suite.configs(options).each do |config|
           # x.report(operation: "sibling_ids")    { node.sibling_ids }   # sql: same as children (equality)
           # x.report(operation: "root")           { leaf.root }          # sql: same as parent (revisit with root_id cache)
           x.report(operation: "roots")            { klass.roots.to_a }   # sql: WHERE ancestry IS NULL
+          if klass.respond_to?(:at_depth)
+            node_depth = node.depth
+            x.report(operation: "at_depth(+1)")       { node.descendants.at_depth(node_depth + 1).to_a }
+            x.report(operation: "to_depth(+2)")       { node.descendants.to_depth(node_depth + 2).to_a }
+            x.report(operation: "at_depth(3)")        { klass.at_depth(3).to_a }
+          end
           x.report(operation: "arrange")          { klass.arrange }      # full tree + ruby sorting
           x.report(operation: "arrange_subtree")  { node.subtree.arrange } # subtree arrange (not full table)
 

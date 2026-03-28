@@ -108,9 +108,9 @@ module TreeBench
     "mp3"             => { format: :materialized_path3, cache_depth: true },
     "mp3-parent"      => { format: :materialized_path3, cache_depth: true, parent: true },
     "mp3-parent-root" => { format: :materialized_path3, cache_depth: true, parent: true, root: true },
-    "mp1-virt"        => { cache_depth: true, parent: :virtual, root: :virtual },
-    "mp2-virt"        => { format: :materialized_path2, cache_depth: true, parent: :virtual, root: :virtual },
-    "mp3-virt"        => { format: :materialized_path3, cache_depth: true, parent: :virtual, root: :virtual },
+    "mp1-virt"        => { cache_depth: :virtual, parent: :virtual, root: :virtual },
+    "mp2-virt"        => { format: :materialized_path2, cache_depth: :virtual, parent: :virtual, root: :virtual },
+    "mp3-virt"        => { format: :materialized_path3, cache_depth: :virtual, parent: :virtual, root: :virtual },
     "ltree"           => { format: :ltree, cache_depth: true },
     "array"           => { format: :array, cache_depth: true },
   }.freeze

@@ -95,8 +95,8 @@ Adding a new config = adding one hash entry to `CONFIGS` in `lib/tree_bench.rb`.
 
 ## TODO (local benchmarks)
 
-- **10x scale benchmarks** — current table is 830 rows. At 8,300 rows, optimizer behavior changes (index usage, join strategies). If results shift at scale (e.g., closure_tree descendants overtake LIKE), add a medium scale (3x?) to show the crossover point rather than a binary "one is always better."
-- **Depth-limited scope benchmarks** — e.g., `where(ancestry_depth: 3)`, `descendants.where(ancestry_depth: 2..4)`. This is the intended use case for `cache_depth`. Then test with vs without the depth column to see if it actually helps — if not, `cache_depth` may be a candidate for deprecation in ancestry.
+- ~~**10x scale benchmarks**~~ Done. `--scale 10` (~7,800 rows). CT pulls ahead on arrange and multi-node descendants.
+- ~~**Depth-limited scope benchmarks**~~ Done. `cache_depth` matters: seq scan vs index scan for `at_depth(3)`. BitmapAnd for depth-limited descendants.
 - **Write bench closure_tree comparison** — insert/move/destroy. CT maintains a hierarchy table on every write. This likely highlights cases where each architecture has different tradeoffs.
 - Write bench: replace transaction rollback with real move-back pattern (b=a.children[0]; b.update(parent: c); b.update(parent: a))
 - mp1 vs mp1-parent IPS comparison — cost of adding associations
