@@ -1,6 +1,15 @@
 # tree-bench
 
-Performance benchmark suite for the ancestry gem.
+Performance benchmarks for Ruby tree/hierarchy gems.
+
+## Tone
+
+This is a comparison, not a competition. Findings should highlight areas where each
+library or format excels, surface potential bugs or optimization opportunities, and
+help all tree gem maintainers improve. Avoid "winner/loser" framing — use neutral
+language like "ancestry uses fewer queries here" rather than "ancestry wins" or
+"closure_tree loses". When one library is slower at something, frame it as an
+improvement opportunity, not a weakness.
 
 ## Project Structure
 
@@ -86,10 +95,9 @@ Adding a new config = adding one hash entry to `CONFIGS` in `lib/tree_bench.rb`.
 
 ## TODO (local benchmarks)
 
-- Depth-limited scope benchmarks — where `cache_depth` should shine (not yet tested)
+- **10x scale benchmarks** — current table is 830 rows. At 8,300 rows, optimizer behavior changes (index usage, join strategies). If results shift at scale (e.g., closure_tree descendants overtake LIKE), add a medium scale (3x?) to show the crossover point rather than a binary "one is always better."
+- **Depth-limited scope benchmarks** — e.g., `where(ancestry_depth: 3)`, `descendants.where(ancestry_depth: 2..4)`. This is the intended use case for `cache_depth`. Then test with vs without the depth column to see if it actually helps — if not, `cache_depth` may be a candidate for deprecation in ancestry.
+- **Write bench closure_tree comparison** — insert/move/destroy. CT maintains a hierarchy table on every write. This likely highlights cases where each architecture has different tradeoffs.
 - Write bench: replace transaction rollback with real move-back pattern (b=a.children[0]; b.update(parent: c); b.update(parent: a))
-- Larger table benchmarks (10x scale) — prove whether +1 query matters at realistic sizes
-- closure_tree write comparison (insert/move/destroy)
-- Preload/includes benchmark — ancestry N+1 gap vs CT's `includes(:descendants)`
 - mp1 vs mp1-parent IPS comparison — cost of adding associations
 - GitHub usage survey — who uses ancestry, what options, what version, interesting forks

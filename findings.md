@@ -76,7 +76,7 @@ On deep trees (50 levels), `ancestors` narrows significantly — ancestry's `WHE
 ### Architectural differences
 
 - **Ordered traversal** — closure_tree's hierarchy table stores generation order. ancestry would need a position column.
-- **Deep tree scaling** — JOIN vs LIKE. At extreme depth, JOINs scale better than string matching.
+- **Deep tree scaling** — JOIN vs LIKE. At 50 levels, ancestry's LIKE is still faster. JOINs may scale better at extreme depth, but this hasn't been demonstrated.
 - **Eager loading** — closure_tree's `ancestors`/`descendants` are `has_many :through` — `preload` could work natively (once the SQL generation bug is fixed). ancestry's are scopes — `preload` doesn't apply (except `children` with `parent: true`).
 - **Write efficiency** — ancestry: single column UPDATE. closure_tree: hierarchy table maintenance. ancestry is structurally cheaper for writes.
 - **Storage** — ancestry: O(n) single column. closure_tree: O(n × depth) hierarchy table rows.
