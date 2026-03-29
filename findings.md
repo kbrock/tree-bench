@@ -12,6 +12,10 @@ Observations from benchmarking tree gems. PostgreSQL, Ruby 4.0.1, Rails 7.2. Sca
 
 Adding `parent: true` (enabling `has_many :children`, `belongs_to :parent`) costs ~5% on most operations. `arrange_subtree` drops 25% — worth investigating. The payoff: `includes(:parent)` is 16x faster than N+1 `each.parent`.
 
+### Physical vs virtual cached columns
+
+`parent: :virtual` / `root: :virtual` / `cache_depth: :virtual` (stored generated columns) perform identically to their `true` (callback-maintained) counterparts on reads. Same columns, same indexes, same query plans. The difference is only on writes — virtual columns are maintained by the database, physical by Ruby callbacks.
+
 ### Depth cache matters for depth-limited queries
 
 <5% difference on standard operations (descendants, ancestors, etc.) with vs without `cache_depth: true`. Same query counts. But depth-limited scopes show the real value:

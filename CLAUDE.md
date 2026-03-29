@@ -82,6 +82,8 @@ Adding a new config = adding one hash entry to `CONFIGS` in `lib/tree_bench.rb`.
 
 - Config registry is shared across all suites
 - All shapes (wide/deep/mixed) built into one table via `build_all` (~814 rows). Each shape's root/mid/leaf are selective subsets — not the whole table. This ensures postgres uses indexes instead of defaulting to seq scan.
+- Don't run benchmark scripts unless asked — they take 25+ minutes with IPS
+- Don't run multiple bench scripts in parallel — they share the `ancestry_nodes` table and will clobber each other
 - Don't change bench scripts without asking — commented-out operations are intentional notes
 - Virtual columns use `table.virtual` with stored generated SQL from ancestry's `construct_*_sql` methods
 - No leaking between configs — each config calls `build_config!` once (DROP+CREATE), then all shapes build into that table

@@ -2,7 +2,7 @@ require_relative "lib/tree_bench"
 
 options = TreeBench::Suite.parse!
 target_dir = "results/#{options[:scale] || 1}"
-`mkdir -p #{target_dir}`
+FileUtils.mkdir_p(target_dir)
 TreeBench.connect!
 
 TreeBench::Suite.configs(options).each do |config|

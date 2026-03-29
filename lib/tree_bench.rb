@@ -2,6 +2,7 @@ require "active_record"
 require "ancestry"
 require "benchmark/sweet"
 require "logger"
+require "fileutils"
 require "optparse"
 
 module TreeBench

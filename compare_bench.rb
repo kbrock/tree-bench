@@ -39,7 +39,7 @@ ancestry_assoc = ancestry_table_model
 puts "Building ancestry trees..."
 scale = (ARGV.delete("--scale") ? ARGV.shift.to_i : 1)
 target_dir = "results/#{scale}"
-`mkdir -p #{target_dir}`
+FileUtils.mkdir_p(target_dir)
 ancestry_trees = TreeBench::TreeShapes.build_all(ancestry_assoc, scale: scale)
 # Reload base model nodes to pick up the same data
 ancestry_base_trees = {}
