@@ -60,7 +60,7 @@ module TreeBench
         t.index :parent_id
       end
 
-      create_table :closure_tree_node_hierarchies, force: true do |t|
+      create_table :closure_tree_node_hierarchies, id: false, force: true do |t|
         t.integer :ancestor_id, null: false
         t.integer :descendant_id, null: false
         t.integer :generations, null: false
@@ -99,19 +99,17 @@ module TreeBench
   # Both accept ancestry_format:, cache_depth:, parent:, root:.
 
   CONFIGS = {
+    # Cross-format comparison (bare, no cached columns)
     "mp1"             => {},
-    "mp1-depth"       => { cache_depth: true },
-    "mp2"             => { format: :materialized_path2, cache_depth: true },
-    "mp1-parent"      => { cache_depth: true, parent: true },
-    "mp2-parent"      => { format: :materialized_path2, cache_depth: true, parent: true },
-    "mp1-parent-root" => { cache_depth: true, parent: true, root: true },
-    "mp2-parent-root" => { format: :materialized_path2, cache_depth: true, parent: true, root: true },
-    "mp3"             => { format: :materialized_path3, cache_depth: true },
+    "mp2"             => { format: :materialized_path2 },
+    "mp3"             => { format: :materialized_path3 },
+    # Feature comparison (mp3 as primary format)
+    "mp3-depth"       => { format: :materialized_path3, cache_depth: true },
     "mp3-parent"      => { format: :materialized_path3, cache_depth: true, parent: true },
     "mp3-parent-root" => { format: :materialized_path3, cache_depth: true, parent: true, root: true },
-    "mp1-virt"        => { cache_depth: :virtual, parent: :virtual, root: :virtual },
-    "mp2-virt"        => { format: :materialized_path2, cache_depth: :virtual, parent: :virtual, root: :virtual },
+    # root: virtual may slow things down
     "mp3-virt"        => { format: :materialized_path3, cache_depth: :virtual, parent: :virtual, root: :virtual },
+    # PG-only formats
     "ltree"           => { format: :ltree, cache_depth: true },
     "array"           => { format: :array, cache_depth: true },
   }.freeze

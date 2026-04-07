@@ -1,69 +1,45 @@
 # tree-bench
 
-Performance benchmarks for Ruby tree/hierarchy gems.
+Benchmarks for Ruby tree gems — ancestry and closure_tree. Compares serialization formats, configuration options, and cross-library tradeoffs.
 
 ## Goals
 
-1. **Find low-hanging fruit** — identify hot paths and operations where small code changes yield big wins, across any tree gem.
-2. **Compare serialization formats** — materialized path (mp1/mp2/mp3), ltree, array, closure table. Which formats are genuinely faster, and for which operations?
-3. **Measure enhancement impact** — do features like caching `parent_id`, `root_id`, or `depth` actually pay off? Or is the overhead not worth it?
-4. **Cross-library, cross-database comparison** — ancestry, closure_tree, and others. PostgreSQL, MySQL, SQLite. Some performance insights are universal (e.g., association cold-access overhead is a Rails cost, not gem-specific), and benchmarks should surface those.
-
-## Benchmarks
-
-### `read_bench.rb` — configs suite
-
-Compares serialization formats and enhancements within the same ancestry version. Answers: **is there a format that wins? Does caching parent_id or root_id actually help?**
-
-```bash
-DB=pg bundle exec ruby read_bench.rb --all
-```
-
-Outputs IPS, query counts, and SQL + EXPLAIN plans per config. Run individual configs with `-c mp3`.
-
-### `read_bench.rb` — versions suite
-
-Compares the same config across ancestry versions. Answers: **did we introduce extra queries, slower Ruby processing, or regressions?**
-
-Uses mp1 as the default config since it exists in all versions. The format itself doesn't matter — the point is detecting changes in code paths between releases.
-
-```bash
-DB=pg bundle exec ruby read_bench.rb -v v4.1
-DB=pg bundle exec ruby read_bench.rb -v v5
-DB=pg bundle exec ruby read_bench.rb -v current
-```
-
-### `write_bench.rb`
-
-Measures insert, move, and destroy operations. Answers: **what's the write cost of each format and enhancement?**
-
-```bash
-DB=pg bundle exec ruby write_bench.rb --all
-```
-
-### `compare_bench.rb`
-
-Side-by-side ancestry vs closure_tree on the same operations. Answers: **where does each library's architecture shine, and what SQL techniques can we learn from each other?**
-
-```bash
-DB=pg bundle exec ruby compare_bench.rb
-```
-
-### `sql_diff.rb`
-
-Diffs SQL output files to see exactly what changed between versions or configs.
-
-```bash
-ruby sql_diff.rb read_bench-mp1-v5.sql read_bench-mp1-current.sql
-```
+1. **Exercise every difference** — each format and config option generates different SQL. If it's different, benchmark it. If a benchmark doesn't show a difference, add a better benchmark before concluding they're equivalent.
+2. **Understand tradeoffs** — different formats and options excel at different things across databases. Present best practices and best use cases for each.
+3. **Find performance wins** — version-over-version benchmarks catch regressions; config comparisons reveal overhead. Distinguish gem costs from framework costs.
+4. **Simplify** — provide evidence for deprecating, consolidating, or recommending formats and options. Feed findings back to gem maintainers.
 
 ## Results
 
-See [results](results/) for the latest benchmark data.
+See [results/](results/) for benchmark data and [findings](findings.md) for analysis.
 
-## Findings
+## Scripts
 
-See findings.md for benchmark observations and cross-gem comparison data.
+**[read_bench.rb](read_bench.rb)** — ancestry read operations (descendants, ancestors, children, arrange, depth scopes). Compare formats and config options.
+
+```bash
+DB=pg bundle exec ruby read_bench.rb -c mp3 --scale 10
+DB=pg bundle exec ruby read_bench.rb --all
+```
+
+**[write_bench.rb](write_bench.rb)** — ancestry write operations (create, destroy, move).
+
+```bash
+DB=pg bundle exec ruby write_bench.rb -c mp3
+DB=mysql bundle exec ruby write_bench.rb -c mp3-parent
+```
+
+**[compare_bench.rb](compare_bench.rb)** — ancestry vs closure_tree side-by-side on shared operations.
+
+```bash
+DB=pg bundle exec ruby compare_bench.rb --scale 10
+```
+
+**sweet_sql_diff** (from [benchmark-sweet](https://github.com/kbrock/benchmark-sweet)) — diff SQL output files to see what changed between configs or versions.
+
+```bash
+sweet_sql_diff results/1/read_bench-mp2-current.sql results/1/read_bench-mp3-current.sql
+```
 
 ## Setup
 
@@ -73,37 +49,18 @@ Requires local checkouts of [ancestry](https://github.com/stefankroes/ancestry) 
 bundle install
 ```
 
-### Options
-
-| Flag | Description |
-|------|-------------|
-| `-c CONFIG` | Run a single config (default: mp1) |
-| `-v VERSION` | Version label; switches to `versions` suite |
-| `--all` | Run all configs (filters by DB compatibility) |
-| `--force` | Re-run even if results exist |
-| `--metrics M` | Comma-separated: queries,rows,ips (default: all) |
+Use `--help` on any script for options.
 
 ### Configs
 
-- `mp1`, `mp2`, `mp3` — base materialized path formats
-- `mp1-parent`, `mp2-parent`, `mp3-parent` — with physical parent column
-- `mp1-parent-root`, `mp2-parent-root`, `mp3-parent-root` — with physical parent + root columns
-- `mp1-virt`, `mp2-virt`, `mp3-virt` — with virtual (stored generated) parent + root columns
-- `ltree`, `array` — PG-only formats
+| Config           | Purpose                                    |
+|------------------|--------------------------------------------|
+| mp1, mp2, mp3    | Bare formats for cross-format comparison   |
+| mp3-depth        | mp3 + depth cache column                   |
+| mp3-parent       | mp3 + parent association                   |
+| mp3-parent-root  | mp3 + parent and root associations         |
+| ltree, array     | PostgreSQL-only formats                    |
 
-### Output Files
+### Output
 
-- `{bench}_{suite}.json` — benchmark results (e.g., `read_bench_configs.json`)
-- `{bench}-{config}-{version}.sql` — SQL + EXPLAIN plans (e.g., `read_bench-mp1-current.sql`)
-
-### Database
-
-Set `DB=pg` for PostgreSQL (default: sqlite). MySQL supported via `DB=mysql`.
-
-## Methodology
-
-- 830-node trees in three shapes: wide (flat), deep (chain), mixed (realistic)
-- All shapes built into one table so PostgreSQL uses indexes realistically
-- Cold access: association caches reset between iterations
-- Mid-level nodes used for descendant queries (avoids whole-table seq scan on root)
-- IPS via benchmark-ips, query/row counts via ActiveSupport instrumentation
+Each run produces JSON (benchmark data) and SQL (queries + EXPLAIN plans) in `results/{scale}/`.

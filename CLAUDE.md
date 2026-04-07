@@ -2,6 +2,13 @@
 
 Performance benchmarks for Ruby tree/hierarchy gems.
 
+## Goals
+
+1. **Exercise every difference** — each format and configuration option generates different SQL. If it's different, benchmark it. If a benchmark doesn't show a difference, add a better benchmark before concluding they're equivalent.
+2. **Understand tradeoffs** — different formats and options excel at different things across databases. Present best practices and best use cases for each.
+3. **Find performance wins** — version-over-version benchmarks catch regressions; config comparisons reveal overhead. Distinguish gem costs from framework costs.
+4. **Simplify** — provide evidence for deprecating, consolidating, or recommending formats and options. Feed findings back to gem maintainers.
+
 ## Tone
 
 This is a comparison, not a competition. Findings should highlight areas where each
@@ -16,7 +23,7 @@ improvement opportunity, not a weakness.
 - `read_bench.rb` — Read operation benchmarks (IPS, queries, rows) + includes/N+1
 - `write_bench.rb` — Write operation benchmarks (build tree, insert, move, destroy)
 - `compare_bench.rb` — ancestry vs closure_tree side-by-side comparison
-- `sql_diff.rb` — Compare SQL output files across versions
+- `sweet_sql_diff` — Compare SQL output files across versions (in benchmark-sweet gem)
 - `lib/tree_bench.rb` — DB setup, config registry, suite system, tree shape builders
 - `lib/ancestry_model.rb` — AncestryNode model (loaded after connect)
 - `lib/closure_tree_model.rb` — ClosureTreeNode model (loaded after connect)
@@ -38,7 +45,7 @@ DB=pg bundle exec ruby read_bench.rb -v v5
 DB=pg bundle exec ruby read_bench.rb -v v6
 
 # Compare SQL patterns across versions
-ruby sql_diff.rb read_bench-v5.sql read_bench-v6.sql
+sweet_sql_diff read_bench-v5.sql read_bench-v6.sql
 ```
 
 ## Output Files
@@ -70,10 +77,10 @@ Each suite uses a separate JSON file so results from different experiments don't
 Configs are just `has_ancestry` options. Table columns are built automatically via
 `build_config!` and `add_virtual_columns` — no manual table lambda needed.
 
-- `mp1`, `mp2`, `mp3` — base configs (materialized_path, _path2, _path3)
-- `mp1-parent`, `mp2-parent`, `mp3-parent` — with physical parent column
-- `mp1-parent-root`, `mp2-parent-root`, `mp3-parent-root` — with physical parent + root columns
-- `mp1-virt`, `mp2-virt`, `mp3-virt` — with virtual (stored generated) parent + root columns
+- `mp1`, `mp2`, `mp3` — bare formats for cross-format comparison
+- `mp3-depth` — mp3 with depth cache (shows depth column impact)
+- `mp3-parent` — mp3 with parent association (shows association cost/benefit)
+- `mp3-parent-root` — mp3 with parent + root associations
 - `ltree`, `array` — PG-only formats
 
 Adding a new config = adding one hash entry to `CONFIGS` in `lib/tree_bench.rb`.
@@ -97,9 +104,9 @@ Adding a new config = adding one hash entry to `CONFIGS` in `lib/tree_bench.rb`.
 
 ## TODO (local benchmarks)
 
-- ~~**10x scale benchmarks**~~ Done. `--scale 10` (~7,800 rows). CT pulls ahead on arrange and multi-node descendants.
-- ~~**Depth-limited scope benchmarks**~~ Done. `cache_depth` matters: seq scan vs index scan for `at_depth(3)`. BitmapAnd for depth-limited descendants.
-- **Write bench closure_tree comparison** — insert/move/destroy. CT maintains a hierarchy table on every write. This likely highlights cases where each architecture has different tradeoffs.
-- Write bench: replace transaction rollback with real move-back pattern (b=a.children[0]; b.update(parent: c); b.update(parent: a))
-- mp1 vs mp1-parent IPS comparison — cost of adding associations
-- GitHub usage survey — who uses ancestry, what options, what version, interesting forks
+- **Benchmarks for all known SQL differences** — each format generates different SQL for depth, root_id, parent_id, descendants, children. Create benchmarks that exercise every differing code path so we can compare them, find which is better, and explore improvements (indexes, alternate SQL). Currently depth is covered; root_id and parent_id computed SQL are not exercised by any benchmark.
+- **Write bench closure_tree comparison** — insert/move/destroy. CT maintains a hierarchy table on every write.
+- **Ordered descendants benchmark** — where closure_tree's hierarchy table ordering shines
+- **Reduce benchmark configs** — drop configs where SQL is identical and we have evidence. Keep configs where differences exist.
+- **Verify physical vs virtual write cost** — reads are identical, but writes may differ (Ruby-computed value vs DB-computed generated column). Not yet benchmarked.
+- **Move report renderers to benchmark-sweet** — `HtmlReport`, `MarkdownReport` belong in sweet as output formatters (like `save_file` but `save_html`/`save_md`). The runner scripts (`html_report.rb`, `markdown_report.rb`) and `lib/` report classes stay here until migrated.

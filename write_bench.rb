@@ -39,42 +39,27 @@ TreeBench::Suite.configs(options).each do |config|
         leaf = t[:leaf]
         klass = t[:model]
 
-        x.report(operation: "insert leaf") do
-          ActiveRecord::Base.transaction do
-            klass.create!(name: "bench_insert", parent: node)
-            raise ActiveRecord::Rollback
-          end
-        end
-
         other_parent = klass.where.not(id: [node.id, root.id]).first
+        original_parent = leaf.parent
+
+        x.report(operation: "create+destroy") do
+          n = klass.create!(name: "bench_leaf", parent: node)
+          n.destroy
+        end
 
         x.report(operation: "move subtree") do
-          ActiveRecord::Base.transaction do
-            leaf.update!(parent: other_parent)
-            raise ActiveRecord::Rollback
-          end
-        end
-
-        x.report(operation: "destroy leaf") do
-          ActiveRecord::Base.transaction do
-            new_leaf = klass.create!(name: "to_destroy", parent: node)
-            new_leaf.destroy
-            raise ActiveRecord::Rollback
-          end
+          leaf.update!(parent: other_parent)
+          leaf.update!(parent: original_parent)
         end
 
         x.report(operation: "parent=") do
-          ActiveRecord::Base.transaction do
-            leaf.update!(parent: other_parent)
-            raise ActiveRecord::Rollback
-          end
+          leaf.update!(parent: other_parent)
+          leaf.update!(parent: original_parent)
         end
 
         x.report(operation: "parent_id=") do
-          ActiveRecord::Base.transaction do
-            leaf.update!(parent_id: other_parent.id)
-            raise ActiveRecord::Rollback
-          end
+          leaf.update!(parent_id: other_parent.id)
+          leaf.update!(parent_id: original_parent.id)
         end
       end
     end
