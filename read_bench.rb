@@ -97,6 +97,7 @@ TreeBench::Suite.configs(options).each do |config|
       base = File.basename($PROGRAM_NAME, '.rb')
       x.save_file "#{target_dir}/#{base}_#{options[:suite]}.json"
       x.save_sql "#{target_dir}/#{base}-#{config}-#{options[:version]}.sql"
+      x.report_output(ENV["OUTPUT"]) if ENV["OUTPUT"]
     end
   rescue => e
     warn "SKIP #{config}: #{e.message}"

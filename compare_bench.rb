@@ -157,5 +157,6 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
     base = File.basename($PROGRAM_NAME, '.rb')
     x.save_file "#{target_dir}/#{base}.json"
     x.save_sql "#{target_dir}/#{base}.sql"
+    x.report_output(ENV["OUTPUT"]) if ENV["OUTPUT"]
   end
 end

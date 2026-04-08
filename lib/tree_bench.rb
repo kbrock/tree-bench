@@ -180,10 +180,10 @@ module TreeBench
       case options[:suite]
       when "configs"
         x.compare_by :shape, :operation
-        x.report_with row: :operation, column: :config, grouping: [:shape], value: COMPACT_VALUE
+        x.report_with row: :operation, column: :config, grouping: -> c { "#{c[:shape]} #{c[:db]}" }, value: COMPACT_VALUE
       when "versions"
         x.compare_by :version, :shape, :operation
-        x.report_with grouping: [:shape, :db], row: :operation, column: :version, value: COMPACT_VALUE
+        x.report_with grouping: -> c { "#{c[:shape]} #{c[:db]}" }, row: :operation, column: :version, value: COMPACT_VALUE
       else
         abort "Unknown suite: #{options[:suite]}. Use: configs, versions"
       end
