@@ -106,9 +106,7 @@ module TreeBench
     # Feature comparison (mp3 as primary format)
     "mp3-depth"       => { format: :materialized_path3, cache_depth: true },
     "mp3-parent"      => { format: :materialized_path3, cache_depth: true, parent: true },
-    "mp3-parent-root" => { format: :materialized_path3, cache_depth: true, parent: true, root: true },
-    # root: virtual may slow things down
-    "mp3-virt"        => { format: :materialized_path3, cache_depth: :virtual, parent: :virtual, root: :virtual },
+    "mp3-virt"        => { format: :materialized_path3, cache_depth: :virtual, parent: :virtual },
     # PG-only formats
     "ltree"           => { format: :ltree, cache_depth: true },
     "array"           => { format: :array, cache_depth: true },

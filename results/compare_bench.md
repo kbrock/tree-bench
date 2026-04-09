@@ -1,97 +1,57 @@
-# ancestry vs closure_tree
 
-### deep (ips)
+deep
 
-| operation            | ancestry      | ancestry+assoc | closure_tree |
-| -------------------- | ------------: | -------------: | -----------: |
-| root?                | **5,006,001** |    4,994,571.1 |  3,868,185.2 |
-| ancestor_ids         | **572,251.7** |      567,358.9 |      1,192.8 |
-| parent               |       9,765.1 |      **9,863** |      9,208.3 |
-| children             |       9,011.3 |    **9,861.8** |      6,998.8 |
-| ancestors            |   **4,028.8** |        1,424.6 |      1,034.5 |
-| descendants          |   **5,188.1** |        1,495.8 |        928.1 |
-| roots                |       9,054.5 |    **9,351.8** |      8,620.9 |
-| leaf?                |         9,942 |   **10,021.6** |      8,297.3 |
-| ancestor_ids cached  |  38,293,025.4 | **38,654,912** |      1,193.3 |
-| descendants cached   |               |    **3,198.2** |      1,017.1 |
-| 4.preload(:children) |               |    **3,660.2** |      3,025.7 |
+operation            |         ancestry |   ancestry+assoc |    closure_tree
+---------------------|------------------|------------------|----------------
+root?                |  [32m4,911,720.5 i/s[0m |  [32m4,976,470.4 i/s[0m | [31m3,867,353.9 i/s[0m
+ancestor_ids         |    [32m567,189.9 i/s[0m |    [32m567,651.3 i/s[0m |     [31m1,130.2 i/s[0m
+ancestor_ids cached  | [32m36,552,610.8 i/s[0m | [32m36,927,791.6 i/s[0m |     [31m1,106.1 i/s[0m
+parent               |     [32m10,049.8 i/s[0m |      [32m9,960.0 i/s[0m |     [31m9,338.4 i/s[0m
+children             |      [32m9,787.7 i/s[0m |     [32m10,088.8 i/s[0m |     [31m6,999.8 i/s[0m
+ancestors            |      [32m4,214.4 i/s[0m |      [31m1,264.6 i/s[0m |     [31m1,091.8 i/s[0m
+descendants          |      [32m5,372.0 i/s[0m |      [;0m1,623.0 i/s[0m |     [31m1,001.6 i/s[0m
+roots                |      [32m9,638.3 i/s[0m |      [32m9,647.0 i/s[0m |     [31m8,881.2 i/s[0m
+leaf?                |     [32m10,299.3 i/s[0m |      [;0m9,934.7 i/s[0m |     [31m8,503.4 i/s[0m
+arrange              |        [32m288.3 i/s[0m |        [32m289.1 i/s[0m |       [31m197.5 i/s[0m
+4.descendants        |      [32m1,475.5 i/s[0m |      [32m1,797.7 i/s[0m |     [32m1,279.8 i/s[0m
+children cached      |                  |  [32m3,325,824.6 i/s[0m | [31m3,245,207.7 i/s[0m
+descendants cached   |                  |      [32m4,891.4 i/s[0m |     [31m1,012.9 i/s[0m
+4.preload(:children) |                  |      [32m3,661.3 i/s[0m |     [31m3,160.0 i/s[0m
 
-### deep (queries)
+mixed
 
-| operation           | ancestry | ancestry+assoc | closure_tree |
-| ------------------- | -------: | -------------: | -----------: |
-| ancestor_ids        |    **0** |              0 |            1 |
-| ancestor_ids cached |    **0** |              0 |            1 |
-| 4.descendants       |        3 |              3 |        **2** |
+operation            |         ancestry |   ancestry+assoc |    closure_tree
+---------------------|------------------|------------------|----------------
+root?                |  [32m4,945,675.4 i/s[0m |  [32m5,025,309.6 i/s[0m | [31m3,898,478.5 i/s[0m
+ancestor_ids         |  [32m3,042,930.0 i/s[0m |  [32m3,000,069.0 i/s[0m |     [31m1,350.6 i/s[0m
+ancestor_ids cached  | [32m36,893,920.6 i/s[0m | [32m37,377,744.9 i/s[0m |     [31m1,259.3 i/s[0m
+parent               |     [32m10,001.1 i/s[0m |      [32m9,898.3 i/s[0m |     [31m9,259.9 i/s[0m
+children             |      [32m9,715.3 i/s[0m |      [32m9,533.4 i/s[0m |     [31m6,740.6 i/s[0m
+ancestors            |      [32m8,905.7 i/s[0m |      [32m8,895.6 i/s[0m |     [31m1,190.8 i/s[0m
+descendants          |      [32m7,259.2 i/s[0m |      [32m7,262.5 i/s[0m |     [31m1,075.5 i/s[0m
+roots                |      [32m9,614.3 i/s[0m |      [32m9,622.8 i/s[0m |     [31m8,888.3 i/s[0m
+leaf?                |     [32m10,572.3 i/s[0m |      [;0m9,948.9 i/s[0m |     [31m8,503.1 i/s[0m
+arrange              |        [32m290.2 i/s[0m |        [32m289.1 i/s[0m |       [31m187.1 i/s[0m
+4.descendants        |      [32m1,448.3 i/s[0m |      [32m1,450.8 i/s[0m |       [31m263.9 i/s[0m
+children cached      |                  |  [32m3,306,436.7 i/s[0m | [32m3,303,517.5 i/s[0m
+descendants cached   |                  |      [32m7,289.0 i/s[0m |     [31m1,043.1 i/s[0m
+4.preload(:children) |                  |      [32m1,813.9 i/s[0m |       [31m751.4 i/s[0m
 
-### deep (rows)
+wide
 
-| operation     | closure_tree | ancestry | ancestry+assoc |
-| ------------- | -----------: | -------: | -------------: |
-| 4.descendants |       **73** |       75 |             75 |
-
-### mixed (ips)
-
-| operation            | ancestry        | ancestry+assoc   | closure_tree |
-| -------------------- | --------------: | ---------------: | -----------: |
-| root?                | **5,033,369.6** |      4,919,008.3 |  3,873,787.3 |
-| ancestor_ids         | **2,944,779.9** |      2,908,789.6 |      1,346.4 |
-| parent               |     **9,894.6** |          9,817.4 |      9,147.8 |
-| children             |     **9,534.1** |          9,462.6 |      6,384.8 |
-| ancestors            |         8,782.1 |      **8,986.6** |      2,983.6 |
-| descendants          |         7,168.3 |      **7,397.9** |      4,127.6 |
-| roots                |         9,072.2 |      **9,519.1** |      8,694.4 |
-| leaf?                |    **10,248.7** |         10,109.7 |      8,359.6 |
-| arrange              |           275.8 |        **279.2** |        190.2 |
-| ancestor_ids cached  |    37,631,568.4 | **37,812,441.2** |      4,636.8 |
-| 4.descendants        |           1,389 |      **1,431.2** |        291.3 |
-| children cached      |                 |  **3,324,385.2** |  3,232,202.4 |
-| descendants cached   |                 |        **7,399** |      4,133.6 |
-| 4.preload(:children) |                 |      **2,143.2** |      1,549.3 |
-
-### mixed (queries)
-
-| operation           | ancestry | ancestry+assoc | closure_tree |
-| ------------------- | -------: | -------------: | -----------: |
-| ancestor_ids        |    **0** |              0 |            1 |
-| ancestor_ids cached |    **0** |              0 |            1 |
-| 4.descendants       |        5 |              5 |        **4** |
-
-### mixed (rows)
-
-| operation     | closure_tree | ancestry | ancestry+assoc |
-| ------------- | -----------: | -------: | -------------: |
-| 4.descendants |       **36** |       40 |             40 |
-
-### wide (ips)
-
-| operation            | ancestry         | ancestry+assoc  | closure_tree |
-| -------------------- | ---------------: | --------------: | -----------: |
-| root?                |  **5,118,718.9** |     5,100,587.7 |  3,927,981.6 |
-| ancestor_ids         |      3,058,179.3 | **3,063,366.2** |      1,255.4 |
-| parent               |      **9,974.8** |         9,962.8 |      9,333.1 |
-| children             |      **9,196.8** |         8,778.9 |      6,358.5 |
-| ancestors            |          8,792.9 |     **9,000.6** |      1,259.8 |
-| descendants          |          7,477.3 |     **7,487.4** |      4,285.9 |
-| roots                |          9,351.3 |       **9,457** |      9,020.3 |
-| leaf?                |     **10,350.5** |        10,097.7 |      8,609.6 |
-| arrange              |            276.5 |       **277.6** |        185.1 |
-| ancestor_ids cached  | **38,632,194.1** |    37,764,356.1 |      4,778.2 |
-| 4.descendants        |      **1,461.6** |         1,423.3 |        273.7 |
-| descendants cached   |                  |     **7,586.6** |      5,317.9 |
-| 4.preload(:children) |                  |     **1,687.2** |        631.9 |
-
-### wide (queries)
-
-| operation           | ancestry | ancestry+assoc | closure_tree |
-| ------------------- | -------: | -------------: | -----------: |
-| ancestor_ids        |    **0** |              0 |            1 |
-| ancestor_ids cached |    **0** |              0 |            1 |
-| 4.descendants       |        5 |              5 |        **4** |
-
-### wide (rows)
-
-| operation     | closure_tree | ancestry | ancestry+assoc |
-| ------------- | -----------: | -------: | -------------: |
-| 4.descendants |       **20** |       24 |             24 |
-
+operation            |         ancestry |   ancestry+assoc |    closure_tree
+---------------------|------------------|------------------|----------------
+root?                |  [32m4,993,853.2 i/s[0m |  [32m5,042,653.7 i/s[0m | [31m3,868,700.1 i/s[0m
+ancestor_ids         |  [32m3,059,305.1 i/s[0m |  [32m3,054,838.1 i/s[0m |     [31m4,894.0 i/s[0m
+ancestor_ids cached  | [32m36,925,294.2 i/s[0m | [32m36,553,885.5 i/s[0m |     [31m4,969.2 i/s[0m
+parent               |      [32m9,920.3 i/s[0m |      [32m9,871.5 i/s[0m |     [31m9,300.3 i/s[0m
+children             |      [32m9,432.3 i/s[0m |      [;0m8,830.1 i/s[0m |     [31m6,254.9 i/s[0m
+ancestors            |      [32m8,806.7 i/s[0m |      [32m8,805.0 i/s[0m |     [31m1,251.1 i/s[0m
+descendants          |      [32m7,454.2 i/s[0m |      [32m7,448.4 i/s[0m |     [31m1,418.4 i/s[0m
+roots                |      [32m9,612.5 i/s[0m |      [32m9,607.7 i/s[0m |     [31m8,894.0 i/s[0m
+leaf?                |     [32m10,588.1 i/s[0m |     [;0m10,060.0 i/s[0m |     [31m8,502.1 i/s[0m
+arrange              |        [32m287.7 i/s[0m |        [32m288.2 i/s[0m |       [31m188.8 i/s[0m
+4.descendants        |      [32m1,475.1 i/s[0m |      [32m1,479.3 i/s[0m |       [31m319.5 i/s[0m
+children cached      |                  |  [32m3,262,188.1 i/s[0m | [32m3,280,813.4 i/s[0m
+descendants cached   |                  |      [32m7,449.0 i/s[0m |     [31m1,422.5 i/s[0m
+4.preload(:children) |                  |      [32m1,458.5 i/s[0m |       [31m777.9 i/s[0m

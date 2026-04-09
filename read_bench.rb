@@ -20,7 +20,6 @@ TreeBench::Suite.configs(options).each do |config|
           leaf = t[:leaf]
           klass = t[:model]
           has_assoc = klass.reflect_on_association(:children)
-          has_root_assoc = klass.reflect_on_association(:root)
 
           x.report(operation: "has_parent?")      { node.has_parent? }     # pure ruby: no parse
           # x.report(operation: "is_root?")       { root.is_root? }      # pure ruby: same as has_parent?
@@ -80,15 +79,6 @@ TreeBench::Suite.configs(options).each do |config|
             multi_ids = [root.id, node.id]
             x.report(operation: "multi.includes(:children)") do
               klass.where(id: multi_ids).includes(:children).each { |n| n.children.to_a }
-            end
-
-            if has_root_assoc
-              x.report(operation: "each.root") do          # N+1: 1 query + N root lookups
-                depth1.each { |n| n.root }
-              end
-              x.report(operation: "includes(:root)") do    # 2 queries total
-                depth1.includes(:root).each { |n| n.root }
-              end
             end
           end
         end

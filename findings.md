@@ -14,7 +14,19 @@ Adding `parent: true` (enabling `has_many :children`, `belongs_to :parent`) cost
 
 ### Physical vs virtual cached columns
 
-`parent: :virtual` / `root: :virtual` / `cache_depth: :virtual` (stored generated columns) perform identically to their `true` (callback-maintained) counterparts on reads. Same columns, same indexes, same query plans. The difference is only on writes — virtual columns are maintained by the database, physical by Ruby callbacks.
+`parent: :virtual` / `cache_depth: :virtual` (stored generated columns) perform identically to their `true` (callback-maintained) counterparts on both reads and writes. Same columns, same indexes, same query plans, same IPS.
+
+Insert benchmark (10-node chain, pg) confirmed virtual ≡ physical on writes:
+
+| Config      | IPS (avg) |
+|-------------|-----------|
+| base (mp3)  | ~3,700    |
+| parent-virt | ~3,350    |
+| parent-phys | ~3,350    |
+| depth-virt  | ~3,550    |
+| depth-phys  | ~3,450    |
+
+The ~10% parent overhead and ~5% depth overhead persist even with indexes removed — the cost is ActiveRecord attribute tracking and callbacks, not index maintenance. Depth at root vs depth 10 shows no difference (insert cost is independent of tree depth).
 
 ### Depth cache matters for depth-limited queries
 
@@ -29,6 +41,39 @@ With `cache_depth: true` (physical column + index):
 - `descendants.at_depth(+1)` — **BitmapAnd** combining depth index + ancestry index
 
 At 7,800 rows, `at_depth(3)` returns 911 rows. Without the depth column, postgres scans the entire table computing depth per row. With it, it's a direct index lookup. The depth column earns its keep for any query that filters by depth — keep `cache_depth` for applications that use `at_depth`, `to_depth`, or depth-limited descendant queries.
+
+### Virtual parent_id SQL by format
+
+The SQL expression used to compute `parent_id` from the ancestry column varies significantly by format:
+
+| Format  | `construct_parent_id_sql` (postgres)                                       |
+|---------|----------------------------------------------------------------------------|
+| mp1     | `SUBSTR(col, LENGTH(RTRIM(col, REPLACE(col, '/', ''))) + 1)`              |
+| mp2     | same, but must `RTRIM(col,'/')` first (trailing delimiter)                 |
+| mp3     | same as mp2                                                                |
+| ltree   | `subpath(col, nlevel(col) - 1, 1)::text`                                  |
+| array   | `col[array_length(col, 1)]`                                               |
+
+ltree and array have clean, native expressions. mp1/mp2/mp3 all use the same RTRIM+REPLACE+SUBSTR chain (mp1 skips one RTRIM since it has no trailing delimiter, but the difference is trivial).
+
+### parent_id enables simpler leaves query
+
+Current `leaves` scope: `WHERE NOT EXISTS (SELECT 1 FROM table c WHERE c.ancestry = (child_ancestry_sql))` — requires computing child_ancestry for every candidate row.
+
+With parent_id (virtual or physical): `WHERE NOT EXISTS (SELECT 1 FROM table c WHERE c.parent_id = nodes.id)` — simple indexed lookup. This is a significant optimization opportunity, especially for ltree where `child_ancestry_sql` involves concatenation.
+
+### Considered: virtual `path` column (ancestry + id)
+
+A stored generated `path` column = `CONCAT(ancestry, id, '/')` would give `child_ancestry` for free as a column read. Every query that currently computes child_ancestry (descendants, children, leaves, subtree) could use the column directly. PG and SQLite support this (id available to generated columns at write time); MySQL does not (can't reference auto-increment).
+
+Queries that would use `path` instead of computing `child_ancestry`:
+
+- **children**: `WHERE ancestry = node.path` (currently `WHERE ancestry = CONCAT(ancestry, id, '/')`)
+- **descendants**: `WHERE ancestry LIKE node.path || '%'` (currently `LIKE CONCAT(ancestry, id, '/') || '%'`)
+- **leaves**: `NOT EXISTS (... WHERE ancestry = nodes.path)` (currently `ancestry = (child_ancestry_sql)`)
+- **subtree**: same pattern, replaces CONCAT with column read
+
+**Not pursued** — every simplification just removes a CONCAT, which is cheap SQL. The cost (double string storage, wider indexes, AR attribute overhead) far outweighs saving a concatenation. The parent_id approach for leaves (`WHERE parent_id = nodes.id`) goes the other direction — replacing a string match with an integer index lookup — which is a fundamentally better query, not just a simpler one.
 
 ### Version-over-version (v4.1 through master)
 

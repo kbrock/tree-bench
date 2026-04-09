@@ -80,7 +80,6 @@ Configs are just `has_ancestry` options. Table columns are built automatically v
 - `mp1`, `mp2`, `mp3` — bare formats for cross-format comparison
 - `mp3-depth` — mp3 with depth cache (shows depth column impact)
 - `mp3-parent` — mp3 with parent association (shows association cost/benefit)
-- `mp3-parent-root` — mp3 with parent + root associations
 - `ltree`, `array` — PG-only formats
 
 Adding a new config = adding one hash entry to `CONFIGS` in `lib/tree_bench.rb`.
@@ -108,5 +107,3 @@ Adding a new config = adding one hash entry to `CONFIGS` in `lib/tree_bench.rb`.
 - **Write bench closure_tree comparison** — insert/move/destroy. CT maintains a hierarchy table on every write.
 - **Ordered descendants benchmark** — where closure_tree's hierarchy table ordering shines
 - **Reduce benchmark configs** — drop configs where SQL is identical and we have evidence. Keep configs where differences exist.
-- **Verify physical vs virtual write cost** — reads are identical, but writes may differ (Ruby-computed value vs DB-computed generated column). Not yet benchmarked.
-- **Move report renderers to benchmark-sweet** — `HtmlReport`, `MarkdownReport` belong in sweet as output formatters (like `save_file` but `save_html`/`save_md`). The runner scripts (`html_report.rb`, `markdown_report.rb`) and `lib/` report classes stay here until migrated.
