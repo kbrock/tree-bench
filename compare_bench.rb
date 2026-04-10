@@ -93,14 +93,24 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
       x.report(operation: "root?")               { a_node.root? }
       x.report(operation: "ancestor_ids")         { a_node.instance_variable_set(:@_ancestor_ids, nil); a_node.ancestor_ids }
       x.report(operation: "ancestor_ids cached")  { a_node.ancestor_ids }
-      x.report(operation: "parent")               { a_node.parent }
+      x.report(operation: "parent")               { a_node.parent }                    # scope: queries each call
+      x.report(operation: "parent cached")        { a_node.parent }                    # scope: no cache, re-queries
       x.report(operation: "children")             { a_node.children.to_a }             # scope: fresh relation each call
+      x.report(operation: "children cached")      { a_node.children.to_a }             # scope: no cache, re-queries
       x.report(operation: "ancestors")            { a_node.ancestors.to_a }
+      x.report(operation: "ancestors cached")     { a_node.ancestors.to_a }            # scope: no cache, re-queries
       x.report(operation: "descendants")          { a_node.descendants.to_a }
+      x.report(operation: "descendants cached")   { a_node.descendants.to_a }           # scope: no cache, re-queries
       x.report(operation: "roots")                { a_klass.roots.to_a }
       x.report(operation: "leaf?")                { a_leaf.leaf? }
       x.report(operation: "arrange")              { a_klass.arrange }
-      # no descendants association — loads 4 nodes then queries descendants individually
+      # no has_many — each call is a separate scope query (N+1)
+      x.report(operation: "4.each_parent") do
+        a_klass.where(id: a_depth1.map(&:id)).each { |n| n.parent }
+      end
+      x.report(operation: "4.each_children") do
+        a_klass.where(id: a_depth1.map(&:id)).each { |n| n.children.to_a }
+      end
       x.report(operation: "4.descendants") do
         a_klass.where(id: a_depth1.map(&:id)).each { |n| n.descendants.to_a }
       end
@@ -111,20 +121,29 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
       x.report(operation: "root?")               { v_node.root? }
       x.report(operation: "ancestor_ids")         { v_node.instance_variable_set(:@_ancestor_ids, nil); v_node.ancestor_ids }
       x.report(operation: "ancestor_ids cached")  { v_node.ancestor_ids }
-      x.report(operation: "parent")               { v_node.association(:parent).reset; v_node.parent }
+      x.report(operation: "parent")               { v_node.association(:parent).reset; v_node.parent }  # cold: association reset
+      x.report(operation: "parent cached")        { v_node.parent }                                      # warm: AR cache hit
       x.report(operation: "children")             { v_node.association(:children).reset; v_node.children.to_a }  # cold: association reset
       x.report(operation: "children cached")      { v_node.children.to_a }                                      # warm: AR cache hit
-      x.report(operation: "ancestors")            { v_node.ancestors.to_a }
+      x.report(operation: "ancestors")            { v_node.ancestors.to_a }                                      # scope: no cache
+      x.report(operation: "ancestors cached")     { v_node.ancestors.to_a }                                      # scope: no cache, re-queries
       x.report(operation: "descendants")          { v_node.descendants.to_a }
-      x.report(operation: "descendants cached")   { v_node.descendants.to_a }                                   # scope returns new relation — verifies no caching
+      x.report(operation: "descendants cached")   { v_node.descendants.to_a }                                   # scope: no cache, re-queries
       x.report(operation: "roots")                { v_klass.roots.to_a }
       x.report(operation: "leaf?")                { v_leaf.leaf? }
       x.report(operation: "arrange")              { v_klass.arrange }
-      # preload: has has_many :children, so preload works (2 queries)
+      x.report(operation: "4.each_parent") do
+        v_klass.where(id: v_depth1.map(&:id)).each { |n| n.association(:parent).reset; n.parent }
+      end
+      x.report(operation: "4.includes(:parent)") do
+        v_klass.where(id: v_depth1.map(&:id)).includes(:parent).each { |n| n.parent }
+      end
+      x.report(operation: "4.each_children") do
+        v_klass.where(id: v_depth1.map(&:id)).each { |n| n.association(:children).reset; n.children.to_a }
+      end
       x.report(operation: "4.preload(:children)") do
         v_klass.where(id: v_depth1.map(&:id)).preload(:children).each { |n| n.children.to_a }
       end
-      # no descendants association — loads 4 nodes then queries descendants individually
       x.report(operation: "4.descendants") do
         v_klass.where(id: v_depth1.map(&:id)).each { |n| n.descendants.to_a }
       end
@@ -135,20 +154,29 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
       x.report(operation: "root?")               { c_node.root? }
       x.report(operation: "ancestor_ids")         { c_node.association(:ancestor_hierarchies).reset; c_node.ancestor_ids }
       x.report(operation: "ancestor_ids cached")  { c_node.ancestor_ids }
-      x.report(operation: "parent")               { c_node.association(:parent).reset; c_node.parent }
+      x.report(operation: "parent")               { c_node.association(:parent).reset; c_node.parent }  # cold: association reset
+      x.report(operation: "parent cached")        { c_node.parent }                                      # warm: AR cache hit
       x.report(operation: "children")             { c_node.association(:children).reset; c_node.children.to_a }  # cold: association reset
       x.report(operation: "children cached")      { c_node.children.to_a }                                      # warm: AR cache hit
-      x.report(operation: "ancestors")            { c_node.association(:self_and_ancestors).reset; c_node.ancestors.to_a }
-      x.report(operation: "descendants")          { c_node.association(:self_and_descendants).reset; c_node.descendants.to_a }
+      x.report(operation: "ancestors")            { c_node.association(:self_and_ancestors).reset; c_node.ancestors.to_a }  # cold
+      x.report(operation: "ancestors cached")     { c_node.ancestors.to_a }                                      # warm: has_many :through cache
+      x.report(operation: "descendants")          { c_node.association(:self_and_descendants).reset; c_node.descendants.to_a }  # cold
       x.report(operation: "descendants cached")   { c_node.descendants.to_a }                                   # warm: has_many :through cache
       x.report(operation: "roots")                { c_klass.roots.to_a }
       x.report(operation: "leaf?")                { c_node.association(:children).reset; c_leaf.leaf? }
       x.report(operation: "arrange")              { c_klass.hash_tree }
-      # preload: CT has has_many for children and descendants (2 queries each)
+      x.report(operation: "4.each_parent") do
+        c_klass.where(id: c_depth1.map(&:id)).each { |n| n.association(:parent).reset; n.parent }
+      end
+      x.report(operation: "4.includes(:parent)") do
+        c_klass.where(id: c_depth1.map(&:id)).includes(:parent).each { |n| n.parent }
+      end
+      x.report(operation: "4.each_children") do
+        c_klass.where(id: c_depth1.map(&:id)).each { |n| n.association(:children).reset; n.children.to_a }
+      end
       x.report(operation: "4.preload(:children)") do
         c_klass.where(id: c_depth1.map(&:id)).preload(:children).each { |n| n.children.to_a }
       end
-      # CT descendants — same N+1 pattern as ancestry (preload(:self_and_descendants) errors)
       x.report(operation: "4.descendants") do
         c_depth1.each { |n| n.association(:self_and_descendants).reset; n.descendants.to_a }
       end

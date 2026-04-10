@@ -157,13 +157,13 @@ module TreeBench
       options
     end
 
-    COMPACT_VALUE = -> c {
+    COMPACT_VALUE = -> (c, color: true) {
       num = c.central_tendency.round(1)
       whole, dec = num.to_s.split(".")
       formatted = whole.gsub(/(\d)(?=(\d{3})+(?!\d))/, '\\1,')
       formatted = "#{formatted}.#{dec}" if dec
       val = "#{formatted} #{c.units}"
-      "\033[#{c.color}m#{val}\e[0m"
+      color ? "\033[#{c.color}m#{val}\e[0m" : val
     }
 
     def self.configs(options)

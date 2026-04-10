@@ -20,11 +20,11 @@ Insert benchmark (10-node chain, pg) confirmed virtual ≡ physical on writes:
 
 | Config      | IPS (avg) |
 |-------------|-----------|
-| base (mp3)  | ~3,700    |
-| parent-virt | ~3,350    |
-| parent-phys | ~3,350    |
-| depth-virt  | ~3,550    |
-| depth-phys  | ~3,450    |
+| base (mp3)  |    ~3,700 |
+| parent-virt |    ~3,350 |
+| parent-phys |    ~3,350 |
+| depth-virt  |    ~3,550 |
+| depth-phys  |    ~3,450 |
 
 The ~10% parent overhead and ~5% depth overhead persist even with indexes removed — the cost is ActiveRecord attribute tracking and callbacks, not index maintenance. Depth at root vs depth 10 shows no difference (insert cost is independent of tree depth).
 
@@ -46,13 +46,13 @@ At 7,800 rows, `at_depth(3)` returns 911 rows. Without the depth column, postgre
 
 The SQL expression used to compute `parent_id` from the ancestry column varies significantly by format:
 
-| Format  | `construct_parent_id_sql` (postgres)                                       |
-|---------|----------------------------------------------------------------------------|
-| mp1     | `SUBSTR(col, LENGTH(RTRIM(col, REPLACE(col, '/', ''))) + 1)`              |
-| mp2     | same, but must `RTRIM(col,'/')` first (trailing delimiter)                 |
-| mp3     | same as mp2                                                                |
-| ltree   | `subpath(col, nlevel(col) - 1, 1)::text`                                  |
-| array   | `col[array_length(col, 1)]`                                               |
+| Format | `construct_parent_id_sql` (postgres)                              |
+|--------|-------------------------------------------------------------------|
+| mp1    | `SUBSTR(col, LENGTH(RTRIM(col, REPLACE(col, '/', ''))) + 1)`     |
+| mp2    | same, but must `RTRIM(col,'/')` first (trailing delimiter)        |
+| mp3    | same as mp2                                                       |
+| ltree  | `subpath(col, nlevel(col) - 1, 1)::text`                         |
+| array  | `col[array_length(col, 1)]`                                       |
 
 ltree and array have clean, native expressions. mp1/mp2/mp3 all use the same RTRIM+REPLACE+SUBSTR chain (mp1 skips one RTRIM since it has no trailing delimiter, but the difference is trivial).
 
@@ -90,12 +90,12 @@ Cold access: association caches reset between iterations.
 
 ### Caching behavior
 
-| Operation | ancestry | ancestry+assoc | closure_tree |
-|-----------|----------|----------------|--------------|
-| ancestor_ids (uncached) | 3.1M i/s (parse string) | 3.1M i/s | 1.2K i/s (queries hierarchy table) |
-| ancestor_ids (cached) | 38M i/s (ivar) | 38M i/s | 1.2K i/s (no ivar cache, re-queries) |
-| children (cached) | n/a (scope, no cache) | 3.3M i/s (AR assoc cache) | 3.3M i/s (AR assoc cache) |
-| descendants (cached) | re-queries | re-queries | re-queries |
+| Operation               | ancestry              | ancestry+assoc          | closure_tree                        |
+|-------------------------|-----------------------|-------------------------|-------------------------------------|
+| ancestor_ids (uncached) | 3.1M i/s (parse)      | 3.1M i/s                | 1.2K i/s (queries hierarchy table)  |
+| ancestor_ids (cached)   | 38M i/s (ivar)        | 38M i/s                 | 1.2K i/s (no ivar cache, re-queries)|
+| children (cached)       | n/a (scope, no cache) | 3.3M i/s (AR assoc)     | 3.3M i/s (AR assoc cache)           |
+| descendants (cached)    | re-queries            | re-queries              | re-queries                          |
 
 ancestry's `ancestor_ids` ivar cache is a significant advantage for code paths that call it repeatedly (e.g., `parent_id`, `root_id`, `depth` all call `ancestor_ids`). closure_tree could benefit from similar caching.
 
@@ -103,10 +103,10 @@ Descendants are not cached by either library — both return fresh relations on 
 
 ### Multi-node operations (preloading)
 
-| Operation | ancestry | ancestry+assoc | closure_tree |
-|-----------|----------|----------------|--------------|
-| 4.preload(:children) | n/a (no assoc) | 2 queries | 2 queries |
-| 4.descendants | 5 queries | 5 queries | 2-4 queries |
+| Operation            | ancestry       | ancestry+assoc | closure_tree |
+|----------------------|----------------|----------------|--------------|
+| 4.preload(:children) | n/a (no assoc) | 2 queries      | 2 queries    |
+| 4.descendants        | 5 queries      | 5 queries      | 2-4 queries  |
 
 closure_tree's `self_and_descendants` association enables fewer queries when loading descendants for multiple nodes. However, `preload(:self_and_descendants)` currently errors with a SQL generation issue — an opportunity for closure_tree to fix and realize this advantage.
 
@@ -114,17 +114,17 @@ Both libraries support `preload(:children)` when associations are configured (an
 
 ### Read operations (wide shape, IPS)
 
-| Operation | ancestry | ancestry+assoc | closure_tree |
-|-----------|----------|----------------|--------------|
-| root? | 5.1M | 5.1M | 3.9M |
-| ancestor_ids | 3.1M | 3.1M | 1.3K |
-| parent | 10.0K | 10.0K | 9.3K |
-| children | 9.2K | 8.8K | 6.4K |
-| ancestors | 8.8K | 9.0K | 1.3K |
-| descendants | 7.5K | 7.5K | 4.3K |
-| roots | 9.4K | 9.5K | 9.0K |
-| leaf? | 10.4K | 10.1K | 8.6K |
-| arrange | 277 | 278 | 185 |
+| Operation    | ancestry | ancestry+assoc | closure_tree |
+|--------------|----------|----------------|--------------|
+| root?        |     5.1M |           5.1M |         3.9M |
+| ancestor_ids |     3.1M |           3.1M |         1.3K |
+| parent       |    10.0K |          10.0K |         9.3K |
+| children     |     9.2K |           8.8K |         6.4K |
+| ancestors    |     8.8K |           9.0K |         1.3K |
+| descendants  |     7.5K |           7.5K |         4.3K |
+| roots        |     9.4K |           9.5K |         9.0K |
+| leaf?        |    10.4K |          10.1K |         8.6K |
+| arrange      |      277 |            278 |          185 |
 
 Query counts are identical (1 each) for most operations. The IPS differences reflect query complexity (JOIN through hierarchy table vs LIKE/IN), not query count.
 
@@ -138,26 +138,26 @@ Running with `--scale 10` (~7,800 rows vs ~830) shifts several results. Ancestry
 
 #### Wide shape (scale 10 IPS)
 
-| Operation       | ancestry     | ancestry+assoc | closure_tree | Notes                            |
-|-----------------|--------------|----------------|--------------|----------------------------------|
-| ancestor_ids    | 3.1M         | 3.0M           | 5.2K         | ancestry: string parse, no query |
-| parent          | 9.8K         | 9.5K           | 9.2K         |                                  |
-| children        | 9.0K         | 8.5K           | 6.2K         |                                  |
-| ancestors       | 8.6K         | 8.3K           | 5.2K         | changed (CT was 1.3K at s1)     |
-| descendants     | 7.3K         | 7.1K           | 5.1K         | changed (CT was 4.3K at s1)     |
-| roots           | 6.5K         | 6.4K           | 6.6K         | changed (ancestry led at s1)    |
-| arrange         | 27.5         | 29.2           | 32.1         | changed (ancestry led at s1)    |
-| 4.descendants   | 1.1K         | 1.4K           | 1.4K         |                                  |
+| Operation     | ancestry | ancestry+assoc | closure_tree | Notes                            |
+|---------------|----------|----------------|--------------|----------------------------------|
+| ancestor_ids  |     3.1M |           3.0M |         5.2K | ancestry: string parse, no query |
+| parent        |     9.8K |           9.5K |         9.2K |                                  |
+| children      |     9.0K |           8.5K |         6.2K |                                  |
+| ancestors     |     8.6K |           8.3K |         5.2K | changed (CT was 1.3K at s1)      |
+| descendants   |     7.3K |           7.1K |         5.1K | changed (CT was 4.3K at s1)      |
+| roots         |     6.5K |           6.4K |         6.6K | changed (ancestry led at s1)     |
+| arrange       |     27.5 |           29.2 |         32.1 | changed (ancestry led at s1)     |
+| 4.descendants |     1.1K |           1.4K |         1.4K |                                  |
 
 #### Deep shape (scale 10 IPS)
 
-| Operation       | ancestry     | ancestry+assoc | closure_tree | Notes                            |
-|-----------------|--------------|----------------|--------------|----------------------------------|
-| children        | 8.1K         | 7.2K           | 5.2K         |                                  |
-| ancestors       | 4.5K         | 2.2K           | 1.6K         | all slower — deep IN/JOIN cost   |
-| descendants     | 1.9K         | 1.8K           | 397          |                                  |
-| arrange         | 28.2         | 28.0           | 32.9         | changed (ancestry led at s1)    |
-| 4.descendants   | 312          | 576            | 661          | changed (ancestry led at s1)    |
+| Operation     | ancestry | ancestry+assoc | closure_tree | Notes                          |
+|---------------|----------|----------------|--------------|--------------------------------|
+| children      |     8.1K |           7.2K |         5.2K |                                |
+| ancestors     |     4.5K |           2.2K |         1.6K | all slower — deep IN/JOIN cost |
+| descendants   |     1.9K |           1.8K |          397 |                                |
+| arrange       |     28.2 |           28.0 |         32.9 | changed (ancestry led at s1)   |
+| 4.descendants |      312 |            576 |          661 | changed (ancestry led at s1)   |
 
 #### What changed at scale
 
@@ -172,7 +172,7 @@ Running with `--scale 10` (~7,800 rows vs ~830) shifts several results. Ancestry
 
 - **Ordered traversal** — closure_tree's hierarchy table stores generation order. ancestry would need a position column.
 - **Deep tree scaling** — JOIN vs LIKE. At 50 levels, ancestry's LIKE is still faster. JOINs may scale better at extreme depth, but this hasn't been demonstrated.
-- **Eager loading** — closure_tree's `ancestors`/`descendants` are `has_many :through` — `preload` could work natively (once the SQL generation bug is fixed). ancestry's are scopes — `preload` doesn't apply (except `children` with `parent: true`).
+- **Eager loading** — closure_tree's `ancestors`/`descendants` are `has_many :through` — `preload` could work natively (once the SQL generation bug is fixed). ancestry's are scopes — `preload` doesn't apply (except `children` with `parent: true`). Unfortunatly has many through isn't the best for caching. This will require a rails patch.
 - **Write efficiency** — ancestry: single column UPDATE. closure_tree: hierarchy table maintenance. ancestry is structurally cheaper for writes.
 - **Storage** — ancestry: O(n) single column. closure_tree: O(n × depth) hierarchy table rows.
 
