@@ -1,0 +1,43 @@
+#!/bin/bash
+# Run regression_bench against one or more ancestry worktrees.
+#
+# Usage: bin/run_regression [--clean] [--force] <label> <path> [<label> <path> ...]
+#
+# Runs regression_bench.rb sequentially for each label/path pair.
+# Results accumulate in results/1/regression_bench_versions.json.
+#
+# Examples:
+#   bin/run_regression to_nodeA ../ancestry-to_nodeA master ../ancestry-master
+#   bin/run_regression --clean to_nodeA ../ancestry-to_nodeA
+#   bin/run_regression --force master ../ancestry-master
+
+source /opt/homebrew/share/chruby/chruby.sh 2>/dev/null
+chruby ruby-4.0.2 2>/dev/null
+
+DB=${DB:-pg}
+FORCE=""
+CLEAN=""
+
+while [[ "$1" == --* ]]; do
+  case "$1" in
+    --clean) CLEAN=1; shift ;;
+    --force) FORCE="--force"; shift ;;
+    *) echo "Unknown option: $1"; exit 1 ;;
+  esac
+done
+
+if [ $# -lt 2 ] || [ $(($# % 2)) -ne 0 ]; then
+  echo "Usage: $0 [--clean] [--force] <label> <path> [<label> <path> ...]"
+  exit 1
+fi
+
+if [ "$CLEAN" = "1" ]; then
+  rm -f results/1/regression_bench_versions.json
+  echo "Cleaned results/1/regression_bench_versions.json"
+fi
+
+while [ $# -ge 2 ]; do
+  label="$1"; path="$2"; shift 2
+  echo "=== $label from $path ==="
+  ANCESTRY_PATH="$path" DB="$DB" bundle exec ruby regression_bench.rb -v "$label" $FORCE
+done

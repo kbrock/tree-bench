@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+# Remove benchmark-sweet entries from results json by metadata match.
+#
+# Usage: bin/clean_bench <key> <value> [file...]
+#
+# Removes entries where name.<key> == <value>.
+# Operates on all results/**/*.json files unless specific files are given.
+#
+# Examples:
+#   bin/clean_bench operation "ancestor_ids cached"
+#   bin/clean_bench version v4.1.0
+#   bin/clean_bench version to_nodeA2 results/1/regression_bench_versions.json
+
+require "json"
+
+key, value, *files = ARGV
+abort "usage: #{$PROGRAM_NAME} <key> <value> [file...]" unless key && value
+
+files = Dir.glob("results/**/*.json") if files.empty?
+
+files.sort.each do |file|
+  data = JSON.parse(File.read(file))
+  before = data.size
+  data.reject! { |entry| entry["name"][key] == value }
+  next if data.size == before
+  File.write(file, JSON.pretty_generate(data))
+  puts "#{file}: #{before} -> #{data.size} (removed #{before - data.size})"
+end

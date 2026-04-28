@@ -1,0 +1,51 @@
+#!/bin/bash
+# Run read_bench against ancestry version worktrees.
+#
+# Usage: bin/run_versions [--clean] [--force] [--bench BENCH] <label> <path> [...]
+#
+# Results accumulate in results/1/{bench}_versions.json.
+#
+# Examples:
+#   bin/run_versions v4.1.0 ../ancestry-v4.1.0 v5.0.0 ../ancestry-v5.0.0
+#   bin/run_versions --clean --force v4.1.0 ../ancestry-v4.1.0
+#   bin/run_versions --bench write_bench v4.1.0 ../ancestry-v4.1.0
+
+source /opt/homebrew/share/chruby/chruby.sh 2>/dev/null
+chruby ruby-4.0.2 2>/dev/null
+
+DB=${DB:-pg}
+FORCE=""
+CLEAN=""
+BENCH="read_bench.rb"
+
+while [[ "$1" == --* ]]; do
+  case "$1" in
+    --clean) CLEAN=1; shift ;;
+    --force) FORCE="--force"; shift ;;
+    --bench) BENCH="$2"; shift 2 ;;
+    *) echo "Unknown option: $1"; exit 1 ;;
+  esac
+done
+
+if [ $# -lt 2 ] || [ $(($# % 2)) -ne 0 ]; then
+  echo "Usage: $0 [--clean] [--force] [--bench BENCH] <label> <path> [<label> <path> ...]"
+  exit 1
+fi
+
+base=$(basename "$BENCH" .rb)
+json_file="results/1/${base}_versions.json"
+
+if [ "$CLEAN" = "1" ]; then
+  rm -f "$json_file"
+  echo "Cleaned $json_file"
+fi
+
+while [ $# -ge 2 ]; do
+  label="$1"; path="$2"; shift 2
+  echo "=== $label from $path ==="
+  ANCESTRY_PATH="$path" DB="$DB" bundle exec ruby "$BENCH" -v "$label" $FORCE
+done
+
+echo ""
+echo "Results in $json_file"
+bin/bench_info "$json_file"

@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Show summary of benchmark JSON files.
+#
+# Usage:
+#   bin/bench_info results/1/read_bench_configs.json
+#   bin/bench_info results/1/*.json
+
+require "json"
+
+ARGV.each do |path|
+  unless File.exist?(path)
+    warn "Not found: #{path}"
+    next
+  end
+
+  data = JSON.parse(File.read(path))
+  data = data["results"] if data.is_a?(Hash) && data["results"]
+
+  puts "#{File.basename(path)}: #{data.size} results"
+
+  dimensions = {}
+  data.each do |r|
+    name = r["name"] || {}
+    name.each { |k, v| (dimensions[k] ||= Set.new) << v }
+    (dimensions["metric"] ||= Set.new) << r["metric"] if r["metric"]
+  end
+
+  dimensions.each do |key, values|
+    sorted = values.sort_by(&:to_s)
+    puts "  %-12s %s" % [key + ":", sorted.join(", ")]
+  end
+  puts
+end
