@@ -20,12 +20,13 @@ abort "No data: #{json_file}" unless File.exist?(json_file)
 
 Benchmark.items(metrics: %w[ips queries rows]) do |x|
   x.save_file json_file
+  x.filter(config: %w[mp1 mp3 mp3-parent array ltree]) { |l| !l[:operation].start_with?("ancestor_ids") }
 
   x.compare_by :shape, :operation
   x.skip_unremarkable!
 
-  # One chart per shape+metric (no metric collision).
-  # X-axis: operations. Bars: configs side by side.
+  # Per-metric charts with baseline normalization.
+  # Pruned to key configs for readability.
   x.report_with row:      :operation,
                 column:   :config,
                 grouping: [:shape, :metric],

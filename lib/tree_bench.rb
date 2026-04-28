@@ -109,6 +109,7 @@ module TreeBench
     "mp3-virt"        => { format: :materialized_path3, cache_depth: :virtual, parent: :virtual },
     # PG-only formats
     "ltree"           => { format: :ltree, cache_depth: true },
+    "ltree-virt"      => { format: :ltree, cache_depth: :virtual, parent: :virtual },
     "array"           => { format: :array, cache_depth: true },
   }.freeze
 
@@ -195,8 +196,23 @@ module TreeBench
 
   module TreeShapes
     SHAPES = %w[wide deep mixed].freeze
+    NODE_POOL_SIZES = [2, 10, 50].freeze
 
-    # Build all shapes into the same table. Returns { "wide" => {root:, mid:, leaf:, model:}, ... }
+    # Pick N nodes evenly spaced from a pool, returning { nodes_2: [...], nodes_10: [...], ... }.
+    # Skips sizes where the pool is too small. Used for bulk *_of([records|ids]) benchmarks —
+    # picks from different subtrees (caller seeds the pool with one node per parent) so the
+    # bulk OR has actual work to do, instead of collapsing to one ancestry prefix.
+    def self.pick_pools(pool)
+      result = {}
+      NODE_POOL_SIZES.each do |n|
+        next if pool.size < n
+        step = pool.size / n
+        result[:"nodes_#{n}"] = (0...n).map { |i| pool[i * step] }
+      end
+      result
+    end
+
+    # Build all shapes into the same table. Returns { "wide" => {root:, mid:, leaf:, model:, nodes_N:}, ... }
     # All shapes coexist — gives ~814 rows at scale=1 for realistic index behavior.
     def self.build_all(model, scale: 1)
       trees = {}
@@ -219,17 +235,19 @@ module TreeBench
     def self.build_wide(model, scale: 1)
       root = model.create!(name: "root")
       mid = nil
+      pool = []
       children_count = 100 * scale
       mid_idx = children_count / 2
       children_count.times do |i|
         child = model.create!(name: "child_#{i}", parent: root)
         mid = child if i == mid_idx
+        pool << child # depth 1 — has grandchildren as descendants; different subtrees by definition
         5.times do |j|
           model.create!(name: "grandchild_#{i}_#{j}", parent: child)
         end
       end
       leaf = model.order(:id).last
-      { root: root.reload, mid: mid.reload, leaf: leaf.reload, model: model }
+      { root: root.reload, mid: mid.reload, leaf: leaf.reload, model: model }.merge(pick_pools(pool))
     end
 
     # 1 root, 50 levels deep, scale siblings at even levels = 50+25*scale nodes
