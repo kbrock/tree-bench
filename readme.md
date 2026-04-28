@@ -1,5 +1,7 @@
 # Tree Bench
 
+[Results](http://thebrocks.net/tree-bench/results/) | [Charts](http://thebrocks.net/tree-bench/results/1/read_bench_configs.html) | [Source](https://github.com/kbrock/tree-bench)
+
 Performance benchmarks for Ruby tree/hierarchy gems, primarily [ancestry](https://github.com/stefankroes/ancestry) with [closure_tree](https://github.com/ClosureTree/closure_tree) comparisons.
 
 This started as a development tool for ancestry — testing serialization formats, catching regressions across versions, and exploring new techniques like database-generated virtual columns. The benchmarks reflect that origin: they test the operations and configurations that an ancestry maintainer thinks about, and they're shaped by that perspective.
@@ -13,9 +15,9 @@ Trees are tested at 2-50 nodes deep and 600-6,000 nodes wide. Most real-world hi
 ## Results
 
 - Library comparison [results](results/compare_bench.md) [src](compare_bench.rb)
-- Read comparison [results](results/read_bench_configs.md) [src](read_bench.rb)
+- Read comparison [results](results/read_bench_configs.md) [chart](results/1/read_bench_configs.html) [src](read_bench.rb)
 - Write comparison [results](results/write_bench_configs.md) [src](write_bench.rb)
-- Virtual vs physical [results](results/insert_bench_configs.md) [src](insert_bench.rb)
+- Version comparison [chart](results/1/read_bench_versions.html) [src](read_bench.rb)
 
 Operations labeled "cached" repeat the call without resetting — showing AR association cache hits when available. Same IPS for both means no caching.
 
@@ -32,6 +34,7 @@ See [findings.md](findings.md) for more detailed analysis and methodology.
 
 - **Ordered descendants** — closure_tree's hierarchy table stores generation order, which should provide an advantage for ordered traversal
 - **Write cost comparison** — ancestry updates a single column; closure_tree maintains a hierarchy table. Quantifying the write tradeoff across insert, move, and destroy
+- **CTE-only adjacency baseline** — add [acts_as_recursive_tree](https://github.com/1and1/acts_as_recursive_tree) and [acts_as_sane_tree](https://github.com/chrisroberts/acts_as_sane_tree). Both use plain `parent_id` adjacency with `WITH RECURSIVE` for subtree queries — no extra column, no closure table, no nested set. They represent a class of solution the current bench doesn't cover, and they predate widespread CTE support so the tradeoff is now interesting on its own. Useful for answering "how much does the materialized-path column actually buy you over modern recursive CTEs?"
 
 ## Running
 
