@@ -17,7 +17,7 @@ Trees are tested at 2-50 nodes deep and 600-6,000 nodes wide. Most real-world hi
 - Library comparison [results](results/compare_bench.md) [src](compare_bench.rb)
 - Read comparison [results](results/read_bench_configs.md) [chart](results/1/read_bench_configs.html) [src](read_bench.rb)
 - Write comparison [results](results/write_bench_configs.md) [src](write_bench.rb)
-- Version comparison [chart](results/1/read_bench_versions.html) [src](read_bench.rb)
+- Version comparison [results](results/read_bench_versions.md) [chart](results/1/read_bench_versions.html) [src](read_bench.rb)
 
 Operations labeled "cached" repeat the call without resetting — showing AR association cache hits when available. Same IPS for both means no caching.
 
@@ -49,7 +49,7 @@ DB=pg bundle exec ruby read_bench.rb --all
 # ancestry config comparison (~7,800 rows)
 DB=pg bundle exec ruby read_bench.rb --all --scale 10
 
-# ancestry vs closure_tree
+# library comparison
 DB=pg bundle exec ruby compare_bench.rb --scale 10
 
 # ancestry write operations
