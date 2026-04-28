@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>read_bench_versions_table</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #fff;
+      color: #1f2328;
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h1 { font-size: 1.5rem; font-weight: 600; }
+    h2 { font-size: 1.1rem; font-weight: 600; margin-top: 2rem; color: #656d76; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0.5rem 0 1.5rem;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.4rem 0.75rem;
+      text-align: right;
+      border-bottom: 1px solid #d1d9e0;
+    }
+    th {
+      font-weight: 600;
+      color: #656d76;
+      border-bottom: 2px solid #d1d9e0;
+    }
+    td.row-label {
+      text-align: left;
+      font-weight: 500;
+    }
+    td.metric { font-variant-numeric: tabular-nums; }
+    td.best { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>read_bench_versions_table</h1>
+    <h2>deep_ips</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>master</th>
+        <th>v4.1.0</th>
+        <th>v4.3.3</th>
+        <th>v5.0.0</th>
+        <th>v5.1.0</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">has_parent?</td>
+        <td class="metric best" style="color: #1a7f37" title="4,470,766.9 i/s">1x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="3,262,467.6 i/s">0.7x</td>
+        <td class="metric slower" style="color: #656d76" title="3,513,444.2 i/s">0.8x</td>
+        <td class="metric slower" style="color: #656d76" title="3,664,504.8 i/s">0.8x</td>
+        <td class="metric slower" style="color: #656d76" title="3,802,848.4 i/s">0.9x</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric same" style="color: #1a7f37" title="493,914.4 i/s">1x</td>
+        <td class="metric best" style="color: #1a7f37" title="507,342.7 i/s">1.0x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="191,343.3 i/s">0.4x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="193,903.6 i/s">0.4x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="195,977.5 i/s">0.4x</td>
+      </tr>
+      <tr>
+        <td class="row-label">descendants</td>
+        <td class="metric best" style="color: #1a7f37" title="3,687.9 i/s">1x</td>
+        <td class="metric same" style="color: #1a7f37" title="3,239.4 i/s">0.9x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2,317.4 i/s">0.6x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1,948.6 i/s">0.5x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2,119.2 i/s">0.6x</td>
+      </tr>
+      <tr>
+        <td class="row-label">at_depth(+1)</td>
+        <td class="metric best" style="color: #1a7f37" title="5,021 i/s">1x</td>
+        <td></td>
+        <td></td>
+        <td class="metric slower worst" style="color: #cf222e" title="4,089.2 i/s">0.8x</td>
+        <td class="metric same" style="color: #1a7f37" title="4,645.2 i/s">0.9x</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange</td>
+        <td class="metric best" style="color: #1a7f37" title="249.7 i/s">1x</td>
+        <td class="metric same" style="color: #1a7f37" title="233.2 i/s">0.9x</td>
+        <td class="metric slower" style="color: #656d76" title="187.4 i/s">0.8x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="145 i/s">0.6x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="150.3 i/s">0.6x</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange_subtree</td>
+        <td class="metric best" style="color: #1a7f37" title="1,282.1 i/s">1x</td>
+        <td class="metric same" style="color: #1a7f37" title="1,242.2 i/s">1.0x</td>
+        <td class="metric slower" style="color: #656d76" title="804.4 i/s">0.6x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="575.7 i/s">0.4x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="639.8 i/s">0.5x</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>mixed_ips</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>master</th>
+        <th>v4.1.0</th>
+        <th>v4.3.3</th>
+        <th>v5.0.0</th>
+        <th>v5.1.0</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">has_parent?</td>
+        <td class="metric best" style="color: #1a7f37" title="4,516,199.4 i/s">1x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2,883,054.9 i/s">0.6x</td>
+        <td class="metric slower" style="color: #656d76" title="3,498,617.3 i/s">0.8x</td>
+        <td class="metric slower" style="color: #656d76" title="3,652,219.4 i/s">0.8x</td>
+        <td class="metric slower" style="color: #656d76" title="3,818,449.4 i/s">0.8x</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric slower" style="color: #656d76" title="2,532,118.5 i/s">1x</td>
+        <td class="metric best" style="color: #1a7f37" title="2,597,401.4 i/s">1.0x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1,587,435.7 i/s">0.6x</td>
+        <td class="metric slower" style="color: #656d76" title="1,690,610.4 i/s">0.7x</td>
+        <td class="metric slower" style="color: #656d76" title="1,698,836.9 i/s">0.7x</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestors</td>
+        <td class="metric same" style="color: #1a7f37" title="7,033 i/s">1x</td>
+        <td class="metric best" style="color: #1a7f37" title="7,364.2 i/s">1.0x</td>
+        <td class="metric same" style="color: #1a7f37" title="7,341.2 i/s">1.0x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="5,995.6 i/s">0.9x</td>
+        <td class="metric same" style="color: #1a7f37" title="6,472.9 i/s">0.9x</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange</td>
+        <td class="metric best" style="color: #1a7f37" title="250.4 i/s">1x</td>
+        <td class="metric same" style="color: #1a7f37" title="231.2 i/s">0.9x</td>
+        <td class="metric slower" style="color: #656d76" title="182.1 i/s">0.7x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="145 i/s">0.6x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="145.3 i/s">0.6x</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange_subtree</td>
+        <td class="metric same" style="color: #1a7f37" title="2,557.2 i/s">1x</td>
+        <td class="metric best" style="color: #1a7f37" title="2,601 i/s">1.0x</td>
+        <td class="metric same" style="color: #1a7f37" title="2,528.8 i/s">1.0x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2,018.7 i/s">0.8x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1,850.9 i/s">0.7x</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>wide_ips</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>master</th>
+        <th>v4.1.0</th>
+        <th>v4.3.3</th>
+        <th>v5.0.0</th>
+        <th>v5.1.0</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">has_parent?</td>
+        <td class="metric best" style="color: #1a7f37" title="4,515,327.9 i/s">1x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2,894,265.9 i/s">0.6x</td>
+        <td class="metric slower" style="color: #656d76" title="3,491,815.4 i/s">0.8x</td>
+        <td class="metric slower" style="color: #656d76" title="3,708,972.4 i/s">0.8x</td>
+        <td class="metric slower" style="color: #656d76" title="3,778,172.3 i/s">0.8x</td>
+      </tr>
+      <tr>
+        <td class="row-label">ancestor_ids</td>
+        <td class="metric same" style="color: #1a7f37" title="2,570,754.9 i/s">1x</td>
+        <td class="metric best" style="color: #1a7f37" title="2,578,193.5 i/s">1.0x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1,590,150.2 i/s">0.6x</td>
+        <td class="metric slower" style="color: #656d76" title="1,710,007.5 i/s">0.7x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="1,654,175.2 i/s">0.6x</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange</td>
+        <td class="metric best" style="color: #1a7f37" title="248.3 i/s">1x</td>
+        <td class="metric same" style="color: #1a7f37" title="228.7 i/s">0.9x</td>
+        <td class="metric slower" style="color: #656d76" title="175.4 i/s">0.7x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="141.7 i/s">0.6x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="147.1 i/s">0.6x</td>
+      </tr>
+      <tr>
+        <td class="row-label">arrange_subtree</td>
+        <td class="metric same" style="color: #1a7f37" title="3,920 i/s">1x</td>
+        <td class="metric best" style="color: #1a7f37" title="4,381.9 i/s">1.1x</td>
+        <td class="metric same" style="color: #1a7f37" title="3,490.5 i/s">0.9x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2,424.8 i/s">0.6x</td>
+        <td class="metric slower worst" style="color: #cf222e" title="2,299.6 i/s">0.6x</td>
+      </tr>
+      </tbody>
+    </table>
+
+</body>
+</html>
