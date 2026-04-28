@@ -31,7 +31,6 @@ if File.exist?(json)
   Benchmark.items(metrics: %w[ips queries rows]) do |x|
     x.save_file json
     x.compare_by :shape, :operation
-    x.skip_unremarkable!
     x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp1"
     x.format(:html)
     x.report_output("#{target_dir}/read_bench_configs_table.html")
@@ -43,12 +42,15 @@ end
 
 json = "#{target_dir}/read_bench_versions.json"
 if File.exist?(json)
+  version_filter = ->(l) { l[:version] != "phase7" }
+
   # Chart
   Benchmark.items(metrics: %w[ips queries rows]) do |x|
     x.save_file json
+    x.filter(&version_filter)
     x.compare_by :config, :shape, :operation
     x.skip_unremarkable!
-    x.report_with row: :operation, column: :version, grouping: [:shape, :metric], baseline: "master"
+    x.report_with row: :operation, column: :version, grouping: [:shape, :metric], baseline: "v5.0.0"
     x.format(:chart)
     x.report_output("#{target_dir}/read_bench_versions.html")
   end
@@ -57,9 +59,9 @@ if File.exist?(json)
   # HTML table
   Benchmark.items(metrics: %w[ips queries rows]) do |x|
     x.save_file json
+    x.filter(&version_filter)
     x.compare_by :config, :shape, :operation
-    x.skip_unremarkable!
-    x.report_with row: :operation, column: :version, grouping: [:shape, :metric], baseline: "master"
+    x.report_with row: :operation, column: :version, grouping: [:shape, :metric], baseline: "v5.0.0"
     x.format(:html)
     x.report_output("#{target_dir}/read_bench_versions_table.html")
   end
@@ -73,7 +75,6 @@ if File.exist?(json)
   Benchmark.items(metrics: %w[ips queries rows]) do |x|
     x.save_file json
     x.compare_by :shape, :operation
-    x.skip_unremarkable!
     x.report_with row: :operation, column: :gem, grouping: [:shape, :metric], baseline: "ancestry"
     x.format(:html)
     x.report_output("#{target_dir}/compare_bench.html")
@@ -88,7 +89,6 @@ if File.exist?(json)
   Benchmark.items(metrics: %w[ips queries rows]) do |x|
     x.save_file json
     x.compare_by :shape, :operation
-    x.skip_unremarkable!
     x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp1"
     x.format(:html)
     x.report_output("#{target_dir}/write_bench_configs.html")

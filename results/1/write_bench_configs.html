@@ -56,21 +56,21 @@
       <tbody>
       <tr>
         <td class="row-label">create+destroy</td>
-        <td class="metric same" style="color: #1a7f37" title="1,580.4 i/s">1x</td>
+        <td class="metric same" style="color: #656d76" title="baseline (i/s)">1,580.4</td>
         <td class="metric slower worst" style="color: #cf222e" title="1,279.6 i/s">0.8x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,509.3 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,566.1 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,509.3 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,566.1 i/s">1.0x</td>
         <td class="metric best" style="color: #1a7f37" title="1,586.6 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,525.1 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,481.3 i/s">0.9x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,520.7 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,525.1 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,481.3 i/s">0.9x</td>
+        <td class="metric same" style="color: #656d76" title="1,520.7 i/s">1.0x</td>
       </tr>
       <tr>
         <td class="row-label">move subtree</td>
-        <td class="metric same" style="color: #1a7f37" title="1,235.4 i/s">1x</td>
+        <td class="metric same" style="color: #656d76" title="baseline (i/s)">1,235.4</td>
         <td class="metric slower worst" style="color: #cf222e" title="877.8 i/s">0.7x</td>
         <td class="metric slower" style="color: #656d76" title="1,160.3 i/s">0.9x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,248.9 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,248.9 i/s">1.0x</td>
         <td class="metric best" style="color: #1a7f37" title="1,270 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="1,184 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="1,118.6 i/s">0.9x</td>
@@ -78,25 +78,169 @@
       </tr>
       <tr>
         <td class="row-label">parent=</td>
-        <td class="metric same" style="color: #1a7f37" title="1,196.2 i/s">1x</td>
+        <td class="metric same" style="color: #656d76" title="baseline (i/s)">1,196.2</td>
         <td class="metric slower worst" style="color: #cf222e" title="873.3 i/s">0.7x</td>
         <td class="metric slower" style="color: #656d76" title="1,152 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,253.3 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,253.3 i/s">1.0x</td>
         <td class="metric best" style="color: #1a7f37" title="1,254.2 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,172.7 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,172.7 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="1,114.9 i/s">0.9x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,179.5 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,179.5 i/s">1.0x</td>
       </tr>
       <tr>
         <td class="row-label">parent_id=</td>
-        <td class="metric same" style="color: #1a7f37" title="943.1 i/s">1x</td>
+        <td class="metric same" style="color: #656d76" title="baseline (i/s)">943.1</td>
         <td class="metric slower worst" style="color: #cf222e" title="723.9 i/s">0.8x</td>
         <td class="metric slower" style="color: #656d76" title="904.8 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="972.5 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="972.5 i/s">1.0x</td>
         <td class="metric best" style="color: #1a7f37" title="987.3 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="926.1 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="891.2 i/s">0.9x</td>
         <td class="metric slower" style="color: #656d76" title="927.6 i/s">1.0x</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>deep_queries</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>mp1</th>
+        <th>array</th>
+        <th>ltree</th>
+        <th>mp2</th>
+        <th>mp3</th>
+        <th>mp3-depth</th>
+        <th>mp3-parent</th>
+        <th>mp3-virt</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">build tree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">79</td>
+        <td class="metric same" style="color: #656d76" title="79 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="79 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="79 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="79 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="79 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="79 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="79 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">create+destroy</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">3</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">move subtree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">4</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">4</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent_id=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">6</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>deep_rows</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>mp1</th>
+        <th>array</th>
+        <th>ltree</th>
+        <th>mp2</th>
+        <th>mp3</th>
+        <th>mp3-depth</th>
+        <th>mp3-parent</th>
+        <th>mp3-virt</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">build tree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">3</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">create+destroy</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+      </tr>
+      <tr>
+        <td class="row-label">move subtree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent_id=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">2</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
       </tr>
       </tbody>
     </table>
@@ -117,21 +261,21 @@
       <tbody>
       <tr>
         <td class="row-label">create+destroy</td>
-        <td class="metric same" style="color: #1a7f37" title="1,563.9 i/s">1x</td>
+        <td class="metric same" style="color: #656d76" title="baseline (i/s)">1,563.9</td>
         <td class="metric slower worst" style="color: #cf222e" title="1,400.1 i/s">0.9x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,551 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,551 i/s">1.0x</td>
         <td class="metric best" style="color: #1a7f37" title="1,608.2 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,605.1 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,549.9 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,507.4 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,522.3 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,605.1 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,549.9 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,507.4 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,522.3 i/s">1.0x</td>
       </tr>
       <tr>
         <td class="row-label">move subtree</td>
-        <td class="metric same" style="color: #1a7f37" title="1,225.2 i/s">1x</td>
+        <td class="metric same" style="color: #656d76" title="baseline (i/s)">1,225.2</td>
         <td class="metric slower worst" style="color: #cf222e" title="1,023.2 i/s">0.8x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,230.1 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,273.6 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,230.1 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,273.6 i/s">1.0x</td>
         <td class="metric best" style="color: #1a7f37" title="1,289.3 i/s">1.1x</td>
         <td class="metric slower" style="color: #656d76" title="1,203.6 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="1,141.9 i/s">0.9x</td>
@@ -139,25 +283,169 @@
       </tr>
       <tr>
         <td class="row-label">parent=</td>
-        <td class="metric same" style="color: #1a7f37" title="1,228.6 i/s">1x</td>
+        <td class="metric same" style="color: #656d76" title="baseline (i/s)">1,228.6</td>
         <td class="metric slower worst" style="color: #cf222e" title="1,012.5 i/s">0.8x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,229.9 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,229.9 i/s">1.0x</td>
         <td class="metric best" style="color: #1a7f37" title="1,282.1 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,270.9 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,270.9 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="1,200.7 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="1,146.9 i/s">0.9x</td>
         <td class="metric slower" style="color: #656d76" title="1,192.9 i/s">1.0x</td>
       </tr>
       <tr>
         <td class="row-label">parent_id=</td>
-        <td class="metric same" style="color: #1a7f37" title="958.4 i/s">1x</td>
+        <td class="metric same" style="color: #656d76" title="baseline (i/s)">958.4</td>
         <td class="metric slower worst" style="color: #cf222e" title="817.6 i/s">0.9x</td>
-        <td class="metric same" style="color: #1a7f37" title="967.9 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="991.6 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="967.9 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="991.6 i/s">1.0x</td>
         <td class="metric best" style="color: #1a7f37" title="996 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="944.8 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="912.5 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="939.4 i/s">1.0x</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>mixed_queries</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>mp1</th>
+        <th>array</th>
+        <th>ltree</th>
+        <th>mp2</th>
+        <th>mp3</th>
+        <th>mp3-depth</th>
+        <th>mp3-parent</th>
+        <th>mp3-virt</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">build tree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">156</td>
+        <td class="metric same" style="color: #656d76" title="156 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="156 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="156 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="156 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="156 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="156 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="156 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">create+destroy</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">3</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">move subtree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">4</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">4</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent_id=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">6</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>mixed_rows</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>mp1</th>
+        <th>array</th>
+        <th>ltree</th>
+        <th>mp2</th>
+        <th>mp3</th>
+        <th>mp3-depth</th>
+        <th>mp3-parent</th>
+        <th>mp3-virt</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">build tree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">3</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 rows">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">create+destroy</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+      </tr>
+      <tr>
+        <td class="row-label">move subtree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent_id=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">2</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
       </tr>
       </tbody>
     </table>
@@ -178,47 +466,191 @@
       <tbody>
       <tr>
         <td class="row-label">create+destroy</td>
-        <td class="metric same" style="color: #1a7f37" title="1,614.4 i/s">1x</td>
+        <td class="metric same" style="color: #656d76" title="baseline (i/s)">1,614.4</td>
         <td class="metric slower worst" style="color: #cf222e" title="1,403.4 i/s">0.9x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,567.8 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,567.8 i/s">1.0x</td>
         <td class="metric best" style="color: #1a7f37" title="1,626.8 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,593.6 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,568.8 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,593.6 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,568.8 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="1,491.1 i/s">0.9x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,549 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,549 i/s">1.0x</td>
       </tr>
       <tr>
         <td class="row-label">move subtree</td>
-        <td class="metric same" style="color: #1a7f37" title="1,285.6 i/s">1x</td>
+        <td class="metric same" style="color: #656d76" title="baseline (i/s)">1,285.6</td>
         <td class="metric slower worst" style="color: #cf222e" title="1,018.3 i/s">0.8x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,247.8 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,247.8 i/s">1.0x</td>
         <td class="metric best" style="color: #1a7f37" title="1,289.7 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,279 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,260 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,279 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,260 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="1,150.6 i/s">0.9x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,236.8 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,236.8 i/s">1.0x</td>
       </tr>
       <tr>
         <td class="row-label">parent=</td>
-        <td class="metric best" style="color: #1a7f37" title="1,293.5 i/s">1x</td>
+        <td class="metric best" style="color: #1a7f37" title="baseline (i/s)">1,293.5</td>
         <td class="metric slower worst" style="color: #cf222e" title="1,005.9 i/s">0.8x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,236.3 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,262 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,285 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,251.5 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,236.3 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,262 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,285 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,251.5 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="1,156.8 i/s">0.9x</td>
-        <td class="metric same" style="color: #1a7f37" title="1,232.6 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="1,232.6 i/s">1.0x</td>
       </tr>
       <tr>
         <td class="row-label">parent_id=</td>
-        <td class="metric best" style="color: #1a7f37" title="1,002.9 i/s">1x</td>
+        <td class="metric best" style="color: #1a7f37" title="baseline (i/s)">1,002.9</td>
         <td class="metric slower worst" style="color: #cf222e" title="812 i/s">0.8x</td>
-        <td class="metric same" style="color: #1a7f37" title="969.2 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="990.5 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="993.3 i/s">1.0x</td>
-        <td class="metric same" style="color: #1a7f37" title="967.8 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="969.2 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="990.5 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="993.3 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="967.8 i/s">1.0x</td>
         <td class="metric slower" style="color: #656d76" title="919.3 i/s">0.9x</td>
-        <td class="metric same" style="color: #1a7f37" title="969.3 i/s">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="969.3 i/s">1.0x</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>wide_queries</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>mp1</th>
+        <th>array</th>
+        <th>ltree</th>
+        <th>mp2</th>
+        <th>mp3</th>
+        <th>mp3-depth</th>
+        <th>mp3-parent</th>
+        <th>mp3-virt</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">build tree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">605</td>
+        <td class="metric same" style="color: #656d76" title="605 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="605 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="605 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="605 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="605 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="605 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="605 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">create+destroy</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">3</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="3 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">move subtree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">4</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">4</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 queries">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent_id=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (queries)">6</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="6 queries">1.0x</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>wide_rows</h2>
+    <table>
+      <thead><tr>
+        <th>operation</th>
+        <th>mp1</th>
+        <th>array</th>
+        <th>ltree</th>
+        <th>mp2</th>
+        <th>mp3</th>
+        <th>mp3-depth</th>
+        <th>mp3-parent</th>
+        <th>mp3-virt</th>
+      </tr></thead>
+      <tbody>
+      <tr>
+        <td class="row-label">build tree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">4</td>
+        <td class="metric same" style="color: #656d76" title="4 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="4 rows">1.0x</td>
+      </tr>
+      <tr>
+        <td class="row-label">create+destroy</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+      </tr>
+      <tr>
+        <td class="row-label">move subtree</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+        <td class="metric same" style="color: #656d76" title="same-ish (within error)">0</td>
+      </tr>
+      <tr>
+        <td class="row-label">parent_id=</td>
+        <td class="metric same" style="color: #656d76" title="baseline (rows)">2</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
+        <td class="metric same" style="color: #656d76" title="2 rows">1.0x</td>
       </tr>
       </tbody>
     </table>

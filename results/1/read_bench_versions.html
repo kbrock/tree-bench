@@ -31,7 +31,7 @@ new Chart(document.getElementById('chart-0'), {
   type: 'bar',
   data: {
     labels: ["has_parent?", "ancestor_ids", "descendants", "at_depth(+1)", "arrange", "arrange_subtree"],
-    datasets: [{ label: "master", data: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0] }, { label: "v4.1.0", data: [0.7297, 1.0272, 0.8784, null, 0.9341, 0.9688] }, { label: "v4.3.3", data: [0.7859, 0.3874, 0.6284, null, 0.7504, 0.6274] }, { label: "v5.0.0", data: [0.8197, 0.3926, 0.5284, 0.8144, 0.5806, 0.449] }, { label: "v5.1.0", data: [0.8506, 0.3968, 0.5746, 0.9252, 0.6021, 0.499] }]
+    datasets: [{ label: "v5.0.0", data: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0] }, { label: "master", data: [1.22, 2.5472, 1.8925, 1.2279, 1.7222, 2.2271] }, { label: "v4.1.0", data: [0.8903, 2.6165, 1.6624, null, 1.6086, 2.1577] }, { label: "v4.3.3", data: [0.9588, 0.9868, 1.1892, null, 1.2923, 1.3974] }, { label: "v5.1.0", data: [1.0378, 1.0107, 1.0875, 1.136, 1.0369, 1.1113] }]
   },
   options: {
     responsive: true,
@@ -43,14 +43,14 @@ new Chart(document.getElementById('chart-0'), {
       },
       legend: { position: 'top' }
     },
-    scales: { y: { beginAtZero: true, title: { display: true, text: "relative to master" } } }
+    scales: { y: { beginAtZero: true, title: { display: true, text: "relative to v5.0.0" } } }
   }
 });
 new Chart(document.getElementById('chart-1'), {
   type: 'bar',
   data: {
     labels: ["has_parent?", "ancestor_ids", "ancestors", "arrange", "arrange_subtree"],
-    datasets: [{ label: "master", data: [1.0, 1.0, 1.0, 1.0, 1.0] }, { label: "v4.1.0", data: [0.6384, 1.0258, 1.0471, 0.9236, 1.0171] }, { label: "v4.3.3", data: [0.7747, 0.6269, 1.0438, 0.7273, 0.9889] }, { label: "v5.0.0", data: [0.8087, 0.6677, 0.8525, 0.5792, 0.7894] }, { label: "v5.1.0", data: [0.8455, 0.6709, 0.9204, 0.5803, 0.7238] }]
+    datasets: [{ label: "v5.0.0", data: [1.0, 1.0, 1.0, 1.0, 1.0] }, { label: "master", data: [1.2366, 1.4978, 1.173, 1.7265, 1.2668] }, { label: "v4.1.0", data: [0.7894, 1.5364, 1.2283, 1.5947, 1.2885] }, { label: "v4.3.3", data: [0.9579, 0.939, 1.2244, 1.2557, 1.2527] }, { label: "v5.1.0", data: [1.0455, 1.0049, 1.0796, 1.002, 0.9169] }]
   },
   options: {
     responsive: true,
@@ -62,14 +62,14 @@ new Chart(document.getElementById('chart-1'), {
       },
       legend: { position: 'top' }
     },
-    scales: { y: { beginAtZero: true, title: { display: true, text: "relative to master" } } }
+    scales: { y: { beginAtZero: true, title: { display: true, text: "relative to v5.0.0" } } }
   }
 });
 new Chart(document.getElementById('chart-2'), {
   type: 'bar',
   data: {
     labels: ["has_parent?", "ancestor_ids", "arrange", "arrange_subtree"],
-    datasets: [{ label: "master", data: [1.0, 1.0, 1.0, 1.0] }, { label: "v4.1.0", data: [0.641, 1.0029, 0.921, 1.1178] }, { label: "v4.3.3", data: [0.7733, 0.6186, 0.7064, 0.8904] }, { label: "v5.0.0", data: [0.8214, 0.6652, 0.5709, 0.6186] }, { label: "v5.1.0", data: [0.8367, 0.6435, 0.5927, 0.5866] }]
+    datasets: [{ label: "v5.0.0", data: [1.0, 1.0, 1.0, 1.0] }, { label: "master", data: [1.2174, 1.5034, 1.7516, 1.6166] }, { label: "v4.1.0", data: [0.7803, 1.5077, 1.6133, 1.8071] }, { label: "v4.3.3", data: [0.9415, 0.9299, 1.2374, 1.4395] }, { label: "v5.1.0", data: [1.0187, 0.9673, 1.0381, 0.9484] }]
   },
   options: {
     responsive: true,
@@ -81,7 +81,7 @@ new Chart(document.getElementById('chart-2'), {
       },
       legend: { position: 'top' }
     },
-    scales: { y: { beginAtZero: true, title: { display: true, text: "relative to master" } } }
+    scales: { y: { beginAtZero: true, title: { display: true, text: "relative to v5.0.0" } } }
   }
 });
 
