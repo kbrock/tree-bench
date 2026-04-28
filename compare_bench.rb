@@ -91,8 +91,7 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
     # -- ancestry (mp3, scope-based — no has_many associations) --
     x.metadata(gem: "ancestry", shape: shape) do
       x.report(operation: "root?")               { a_node.root? }
-      x.report(operation: "ancestor_ids")         { a_node.instance_variable_set(:@_ancestor_ids, nil); a_node.ancestor_ids }
-      x.report(operation: "ancestor_ids cached")  { a_node.ancestor_ids }
+      x.report(operation: "ancestor_ids")         { a_node.ancestor_ids }
       x.report(operation: "parent")               { a_node.parent }                    # scope: queries each call
       x.report(operation: "parent cached")        { a_node.parent }                    # scope: no cache, re-queries
       x.report(operation: "children")             { a_node.children.to_a }             # scope: fresh relation each call
@@ -119,8 +118,7 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
     # -- ancestry + associations (mp3-virt, virtual parent_id — has_many :children) --
     x.metadata(gem: "ancestry+assoc", shape: shape) do
       x.report(operation: "root?")               { v_node.root? }
-      x.report(operation: "ancestor_ids")         { v_node.instance_variable_set(:@_ancestor_ids, nil); v_node.ancestor_ids }
-      x.report(operation: "ancestor_ids cached")  { v_node.ancestor_ids }
+      x.report(operation: "ancestor_ids")         { v_node.ancestor_ids }
       x.report(operation: "parent")               { v_node.association(:parent).reset; v_node.parent }  # cold: association reset
       x.report(operation: "parent cached")        { v_node.parent }                                      # warm: AR cache hit
       x.report(operation: "children")             { v_node.association(:children).reset; v_node.children.to_a }  # cold: association reset
@@ -153,7 +151,6 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
     x.metadata(gem: "closure_tree", shape: shape) do
       x.report(operation: "root?")               { c_node.root? }
       x.report(operation: "ancestor_ids")         { c_node.association(:ancestor_hierarchies).reset; c_node.ancestor_ids }
-      x.report(operation: "ancestor_ids cached")  { c_node.ancestor_ids }
       x.report(operation: "parent")               { c_node.association(:parent).reset; c_node.parent }  # cold: association reset
       x.report(operation: "parent cached")        { c_node.parent }                                      # warm: AR cache hit
       x.report(operation: "children")             { c_node.association(:children).reset; c_node.children.to_a }  # cold: association reset

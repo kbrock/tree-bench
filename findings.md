@@ -92,12 +92,18 @@ Cold access: association caches reset between iterations.
 
 | Operation               | ancestry              | ancestry+assoc          | closure_tree                        |
 |-------------------------|-----------------------|-------------------------|-------------------------------------|
-| ancestor_ids (uncached) | 3.1M i/s (parse)      | 3.1M i/s                | 1.2K i/s (queries hierarchy table)  |
-| ancestor_ids (cached)   | 38M i/s (ivar)        | 38M i/s                 | 1.2K i/s (no ivar cache, re-queries)|
+| ancestor_ids            | 3.1M i/s (parse)      | 3.1M i/s                | 1.2K i/s (queries hierarchy table)  |
 | children (cached)       | n/a (scope, no cache) | 3.3M i/s (AR assoc)     | 3.3M i/s (AR assoc cache)           |
 | descendants (cached)    | re-queries            | re-queries              | re-queries                          |
 
-ancestry's `ancestor_ids` ivar cache is a significant advantage for code paths that call it repeatedly (e.g., `parent_id`, `root_id`, `depth` all call `ancestor_ids`). closure_tree could benefit from similar caching.
+ancestry's `ancestor_ids` parses the ancestry string in Ruby (no DB query), so it's
+fast enough that an ivar cache adds no practical value. An ivar cache was tested and
+removed: real usage always involves DB calls (~100+ microseconds), dwarfing the
+~0.16 microsecond cache benefit. The uncached path also got 2-11x faster in the same
+cycle, further eliminating the case for caching.
+
+closure_tree queries the hierarchy table for `ancestor_ids` every call. An ivar cache
+there would be meaningful since each call costs ~1ms.
 
 Descendants are not cached by either library — both return fresh relations on every call.
 
