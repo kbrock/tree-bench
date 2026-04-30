@@ -1,7 +1,7 @@
 
 deep
 
-operation            |         ancestry |   ancestry+assoc |    closure_tree
+operation            |              mp3 |         mp3-virt |              ct
 ---------------------|------------------|------------------|----------------
 root?                |  4,856,548.0 i/s |  4,797,540.5 i/s | 3,781,488.4 i/s
 ancestor_ids         |    553,509.8 i/s |    542,704.0 i/s |       886.6 i/s
@@ -25,7 +25,7 @@ arrange              |        276.4 i/s |        280.5 i/s |       174.8 i/s
 
 mixed
 
-operation            |         ancestry |   ancestry+assoc |    closure_tree
+operation            |              mp3 |         mp3-virt |              ct
 ---------------------|------------------|------------------|----------------
 root?                |  4,851,037.0 i/s |  4,835,236.1 i/s | 3,752,446.2 i/s
 ancestor_ids         |  2,952,293.2 i/s |  2,933,890.7 i/s |     3,055.1 i/s
@@ -49,7 +49,7 @@ arrange              |        276.4 i/s |        274.7 i/s |       165.0 i/s
 
 wide
 
-operation            |         ancestry |   ancestry+assoc |    closure_tree
+operation            |              mp3 |         mp3-virt |              ct
 ---------------------|------------------|------------------|----------------
 root?                |  4,991,070.1 i/s |  4,975,515.8 i/s | 3,835,916.3 i/s
 ancestor_ids         |  3,045,556.1 i/s |  2,946,700.3 i/s |     3,254.1 i/s

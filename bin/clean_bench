@@ -1,28 +1,48 @@
 #!/usr/bin/env ruby
-# Remove benchmark-sweet entries from results json by metadata match.
+# Remove or rename benchmark-sweet entries in results json by metadata match.
 #
-# Usage: bin/clean_bench <key> <value> [file...]
+# Usage:
+#   bin/clean_bench <key> <value> [file...]                      # delete
+#   bin/clean_bench <key> <value> --rename <new_value> [file...]  # rename
 #
-# Removes entries where name.<key> == <value>.
 # Operates on all results/**/*.json files unless specific files are given.
 #
 # Examples:
 #   bin/clean_bench operation "ancestor_ids cached"
 #   bin/clean_bench version v4.1.0
-#   bin/clean_bench version to_nodeA2 results/1/regression_bench_versions.json
+#   bin/clean_bench gem "ancestry+assoc" --rename "mp3-virt"
 
 require "json"
 
-key, value, *files = ARGV
-abort "usage: #{$PROGRAM_NAME} <key> <value> [file...]" unless key && value
+args = ARGV.dup
+abort "usage: #{$PROGRAM_NAME} <key> <value> [--rename <new_value>] [file...]" if args.size < 2
 
-files = Dir.glob("results/**/*.json") if files.empty?
+key = args.shift
+old_value = args.shift
+
+new_value = args.first == "--rename" ? (args.shift; args.shift) : nil
+
+files = args.empty? ? Dir.glob("results/**/*.json") : args
 
 files.sort.each do |file|
   data = JSON.parse(File.read(file))
-  before = data.size
-  data.reject! { |entry| entry["name"][key] == value }
-  next if data.size == before
-  File.write(file, JSON.pretty_generate(data))
-  puts "#{file}: #{before} -> #{data.size} (removed #{before - data.size})"
+
+  if new_value
+    count = 0
+    data.each do |entry|
+      if entry["name"][key] == old_value
+        entry["name"][key] = new_value
+        count += 1
+      end
+    end
+    next if count == 0
+    File.write(file, JSON.pretty_generate(data))
+    puts "#{file}: renamed #{count} entries (#{old_value} -> #{new_value})"
+  else
+    before = data.size
+    data.reject! { |entry| entry["name"][key] == old_value }
+    next if data.size == before
+    File.write(file, JSON.pretty_generate(data))
+    puts "#{file}: #{before} -> #{data.size} (removed #{before - data.size})"
+  end
 end
