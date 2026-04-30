@@ -84,12 +84,12 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
 
   Benchmark.items(metrics: metrics) do |x|
     x.compare_by :shape, :operation
-    x.report_with row: :operation, column: :gem, grouping: [:shape], value: TreeBench::Suite::COMPACT_VALUE
+    x.report_with row: :operation, column: :config, grouping: [:shape], value: TreeBench::Suite::COMPACT_VALUE
     x.configure(force: true) if force
     x.metadata(db: TreeBench.db_name)
 
     # -- ancestry (mp3, scope-based — no has_many associations) --
-    x.metadata(gem: "ancestry", shape: shape) do
+    x.metadata(gem: "ancestry", config: "mp3", shape: shape) do
       x.report(operation: "root?")               { a_node.root? }
       x.report(operation: "ancestor_ids")         { a_node.ancestor_ids }
       x.report(operation: "parent")               { a_node.parent }                    # scope: queries each call
@@ -116,7 +116,7 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
     end
 
     # -- ancestry + associations (mp3-virt, virtual parent_id — has_many :children) --
-    x.metadata(gem: "ancestry+assoc", shape: shape) do
+    x.metadata(gem: "ancestry", config: "mp3-virt", shape: shape) do
       x.report(operation: "root?")               { v_node.root? }
       x.report(operation: "ancestor_ids")         { v_node.ancestor_ids }
       x.report(operation: "parent")               { v_node.association(:parent).reset; v_node.parent }  # cold: association reset
@@ -148,7 +148,7 @@ TreeBench::TreeShapes::SHAPES.each do |shape|
     end
 
     # -- closure_tree --
-    x.metadata(gem: "closure_tree", shape: shape) do
+    x.metadata(gem: "closure_tree", config: "ct", shape: shape) do
       x.report(operation: "root?")               { c_node.root? }
       x.report(operation: "ancestor_ids")         { c_node.association(:ancestor_hierarchies).reset; c_node.ancestor_ids }
       x.report(operation: "parent")               { c_node.association(:parent).reset; c_node.parent }  # cold: association reset

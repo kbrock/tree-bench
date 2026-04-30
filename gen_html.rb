@@ -75,7 +75,7 @@ if File.exist?(json)
   Benchmark.items(metrics: %w[ips queries rows]) do |x|
     x.save_file json
     x.compare_by :shape, :operation
-    x.report_with row: :operation, column: :gem, grouping: [:shape, :metric], baseline: "ancestry"
+    x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp3"
     x.format(:html)
     x.report_output("#{target_dir}/compare_bench.html")
   end
