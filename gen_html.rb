@@ -21,7 +21,7 @@ if File.exist?(json)
     x.filter(config: %w[mp1 mp3 mp3-parent array ltree]) { |l| !l[:operation].start_with?("ancestor_ids") }
     x.compare_by :shape, :operation
     x.skip_unremarkable!
-    x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp3"
+    x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp3", column_sort: true
     x.format(:chart)
     x.report_output("#{target_dir}/read_bench_configs.html")
   end
@@ -31,7 +31,7 @@ if File.exist?(json)
   Benchmark.items(metrics: %w[ips queries rows]) do |x|
     x.save_file json
     x.compare_by :shape, :operation
-    x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp1"
+    x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp1", column_sort: true
     x.format(:html)
     x.report_output("#{target_dir}/read_bench_configs_table.html")
   end
@@ -43,6 +43,7 @@ end
 json = "#{target_dir}/read_bench_versions.json"
 if File.exist?(json)
   version_filter = ->(l) { l[:version] != "phase7" }
+  version_order = ->(cols) { cols.sort_by { |c| c.to_s.start_with?("v") ? [0, c.to_s] : [1, c.to_s] } }
 
   # Chart
   Benchmark.items(metrics: %w[ips queries rows]) do |x|
@@ -50,7 +51,7 @@ if File.exist?(json)
     x.filter(&version_filter)
     x.compare_by :config, :shape, :operation
     x.skip_unremarkable!
-    x.report_with row: :operation, column: :version, grouping: [:shape, :metric], baseline: "v5.0.0"
+    x.report_with row: :operation, column: :version, grouping: [:shape, :metric], baseline: "v4.1.0", column_sort: version_order
     x.format(:chart)
     x.report_output("#{target_dir}/read_bench_versions.html")
   end
@@ -61,7 +62,7 @@ if File.exist?(json)
     x.save_file json
     x.filter(&version_filter)
     x.compare_by :config, :shape, :operation
-    x.report_with row: :operation, column: :version, grouping: [:shape, :metric], baseline: "v5.0.0"
+    x.report_with row: :operation, column: :version, grouping: [:shape, :metric], baseline: "v4.1.0", column_sort: version_order
     x.format(:html)
     x.report_output("#{target_dir}/read_bench_versions_table.html")
   end
@@ -75,7 +76,7 @@ if File.exist?(json)
   Benchmark.items(metrics: %w[ips queries rows]) do |x|
     x.save_file json
     x.compare_by :shape, :operation
-    x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp3"
+    x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp3", column_sort: true
     x.format(:html)
     x.report_output("#{target_dir}/compare_bench.html")
   end
@@ -89,7 +90,7 @@ if File.exist?(json)
   Benchmark.items(metrics: %w[ips queries rows]) do |x|
     x.save_file json
     x.compare_by :shape, :operation
-    x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp1"
+    x.report_with row: :operation, column: :config, grouping: [:shape, :metric], baseline: "mp1", column_sort: true
     x.format(:html)
     x.report_output("#{target_dir}/write_bench_configs.html")
   end
