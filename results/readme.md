@@ -18,7 +18,7 @@ Is `ancestry` getting faster over time?
 
 [chart](1/read_bench_versions.html) | [table](1/read_bench_versions_table.html) | [raw](read_bench_versions.md)
 
-Performance from `v4.1.0` through `master`, normalized to `v5.0.0`. Look at `ancestor_ids` (`2`-`11x` faster), `arrange_subtree` (improved in recent versions), and `has_parent?` (pure Ruby, no DB).
+Performance from `v4.1.0` through `master`, normalized to `v4.1.0`. Look at `ancestor_ids` (`2`-`11x` faster), `arrange_subtree` (improved in recent versions), and `has_parent?` (pure Ruby, no DB).
 
 ## Library Comparison
 
@@ -48,7 +48,7 @@ has_ancestry
 
 The default. Descendant queries require an `OR` that the other formats avoid. Included as a baseline and for legacy users.
 
-### `mp2` (materialized_path2)
+### `mp2`
 
 ```ruby
 has_ancestry format: :materialized_path2
@@ -56,7 +56,7 @@ has_ancestry format: :materialized_path2
 
 Adds a trailing slash, removing the `OR` from descendant queries. Same performance as `mp3`. Superseded by `mp3`, which generates simpler SQL and simpler Ruby parsing.
 
-### `mp3` (materialized_path3)
+### `mp3`
 
 ```ruby
 has_ancestry format: :materialized_path3
