@@ -1,0 +1,103 @@
+#!/bin/bash
+# Run a benchmark against multiple ancestry branches.
+#
+# Usage: bin/bench_versions [options] <branch> [<branch> ...]
+#
+#   --config, -c CONFIG    Config to run (repeatable). Default: bench's default.
+#   --bench, -b BENCH      Bench script (default: read_bench.rb)
+#   --metrics, -m METRICS  Metrics list (e.g. queries,rows for a fast dry-run)
+#   --force, -f            Re-run even if results are cached
+#   --clean, -x            Clean results JSON before running
+#   --ancestry DIR         Ancestry repo (default: ../ancestry)
+#   --keep                 Don't drop transient worktrees on exit
+#
+# Each <branch> is resolved to its current SHA, snapshotted in a detached
+# worktree under /tmp/tree-bench-wt-<branch>, benchmarked, then dropped.
+# Cached (label, config, shape, operation) tuples are skipped automatically.
+#
+# Examples:
+#   bin/bench_versions -c mp3 master attribute2 serializer2-pt3
+#   bin/bench_versions -c mp3 -c mp1 master attribute2
+#   bin/bench_versions -f -c mp3 master
+
+set -e
+
+ANCESTRY="../ancestry"
+CONFIGS=()
+BENCH="read_bench.rb"
+FORCE_FLAGS=()
+CLEAN_FLAGS=()
+METRICS_FLAGS=()
+KEEP=""
+
+usage() {
+  sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//' >&2
+  exit "${1:-1}"
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --config|-c)   CONFIGS+=("$2"); shift 2 ;;
+    --config=*)    CONFIGS+=("${1#*=}"); shift ;;
+    --bench|-b)    BENCH="$2"; shift 2 ;;
+    --bench=*)     BENCH="${1#*=}"; shift ;;
+    --metrics|-m)  METRICS_FLAGS=(--metrics "$2"); shift 2 ;;
+    --metrics=*)   METRICS_FLAGS=(--metrics "${1#*=}"); shift ;;
+    --force|-f)    FORCE_FLAGS=(--force); shift ;;
+    --clean|-x)    CLEAN_FLAGS=(--clean); shift ;;
+    --ancestry)    ANCESTRY="$2"; shift 2 ;;
+    --ancestry=*)  ANCESTRY="${1#*=}"; shift ;;
+    --keep)        KEEP=1; shift ;;
+    -h|--help)     usage 0 ;;
+    -*)            echo "Unknown option: $1" >&2; usage ;;
+    *)             break ;;
+  esac
+done
+
+if [ $# -lt 1 ]; then
+  echo "Expected at least one branch" >&2
+  usage
+fi
+
+ANCESTRY_ABS=$(cd "$ANCESTRY" && pwd)
+CREATED=()
+
+cleanup() {
+  if [ -n "$KEEP" ] || [ ${#CREATED[@]} -eq 0 ]; then
+    return
+  fi
+  echo ""
+  echo "Cleaning up worktrees..."
+  for wt in "${CREATED[@]}"; do
+    (cd "$ANCESTRY_ABS" && git worktree remove --force "$wt" 2>/dev/null) || true
+  done
+}
+trap cleanup EXIT
+
+# Resolve each branch -> SHA, create detached worktree, build label/path args.
+ARGS=()
+for branch in "$@"; do
+  if ! sha=$(cd "$ANCESTRY_ABS" && git rev-parse --verify "$branch" 2>/dev/null); then
+    echo "Branch not found: $branch" >&2
+    exit 1
+  fi
+  short=${sha:0:8}
+  wt="/tmp/tree-bench-wt-${branch}"
+
+  if [ -d "$wt" ]; then
+    echo "Worktree already exists, reusing: $wt" >&2
+  else
+    echo "Creating worktree for $branch ($short) at $wt" >&2
+    (cd "$ANCESTRY_ABS" && git worktree add --detach "$wt" "$sha") >&2
+    CREATED+=("$wt")
+  fi
+  ARGS+=("$branch" "$wt")
+done
+
+bin/run_versions \
+  "${CLEAN_FLAGS[@]}" \
+  "${FORCE_FLAGS[@]}" \
+  -b "$BENCH" \
+  "${METRICS_FLAGS[@]}" \
+  $(for c in "${CONFIGS[@]}"; do echo "-c"; echo "$c"; done) \
+  "${ARGS[@]}"

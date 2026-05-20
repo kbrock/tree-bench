@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+# Render the version-comparison table from existing JSON, no benchmarks run.
+# No DB connection, no ancestry required.
+#
+# Usage:
+#   bin/render_versions                                  # default JSON
+#   bin/render_versions results/1/write_bench_versions.json
+
+require "bundler/setup"
+require "benchmark/sweet"
+
+json_file = ARGV[0] || "results/1/read_bench_versions.json"
+abort "Not found: #{json_file}" unless File.exist?(json_file)
+
+compact_value = -> (c, color: true) {
+  num = c.central_tendency.round(1)
+  whole, dec = num.to_s.split(".")
+  formatted = whole.gsub(/(\d)(?=(\d{3})+(?!\d))/, '\\1,')
+  formatted = "#{formatted}.#{dec}" if dec
+  val = "#{formatted} #{c.units}"
+  color ? "\033[#{c.color}m#{val}\e[0m" : val
+}
+
+Benchmark.items(metrics: %w[ips queries rows], quiet: true) do |x|
+  x.save_file json_file
+  x.compare_by :config, :shape, :operation
+  x.report_with(
+    grouping: -> c { "#{c[:config]} #{c[:shape]} #{c[:db]} #{c[:metric]}" },
+    row:      :operation,
+    column:   :version,
+    value:    compact_value
+  )
+end

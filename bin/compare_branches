@@ -1,0 +1,106 @@
+#!/bin/bash
+# Compare benchmark results between two ancestry branches.
+#
+# Usage: bin/compare_branches [options] <before_branch> <after_branch>
+#
+#   --config, -c CONFIG    Config to run (repeatable). Default: bench's default (mp1).
+#   --bench, -b BENCH      Bench script (default: read_bench.rb)
+#   --metrics, -m METRICS  Metrics list (e.g. queries,rows for a fast dry-run)
+#   --force, -f            Re-run before-branch even if results exist
+#   --clean, -x            Clean results JSON before running
+#   --ancestry DIR         Ancestry repo (default: ../ancestry)
+#
+# Worktrees are created at <ancestry>-<branch> on demand.
+# Results land in results/1/{bench}_versions.json with the comparison table
+# printed at the end.
+#
+# Examples:
+#   bin/compare_branches master attribute2
+#   bin/compare_branches -c mp3 master attribute2
+#   bin/compare_branches -c mp1 -c mp3 -f master attribute2
+#   bin/compare_branches --bench write_bench.rb master attribute2
+
+set -e
+
+ANCESTRY="../ancestry"
+CONFIGS=()
+BENCH="read_bench.rb"
+FORCE=""
+CLEAN=""
+METRICS=""
+
+usage() {
+  sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//' >&2
+  exit "${1:-1}"
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --config|-c)   CONFIGS+=("$2"); shift 2 ;;
+    --config=*)    CONFIGS+=("${1#*=}"); shift ;;
+    --bench|-b)    BENCH="$2"; shift 2 ;;
+    --bench=*)     BENCH="${1#*=}"; shift ;;
+    --metrics|-m)  METRICS="$2"; shift 2 ;;
+    --metrics=*)   METRICS="${1#*=}"; shift ;;
+    --force|-f)    FORCE="--force"; shift ;;
+    --clean|-x)    CLEAN="--clean"; shift ;;
+    --ancestry)    ANCESTRY="$2"; shift 2 ;;
+    --ancestry=*)  ANCESTRY="${1#*=}"; shift ;;
+    -h|--help)     usage 0 ;;
+    -*)            echo "Unknown option: $1" >&2; usage ;;
+    *)             break ;;
+  esac
+done
+
+if [ $# -ne 2 ]; then
+  echo "Expected exactly two branch names" >&2
+  usage
+fi
+
+BEFORE="$1"
+AFTER="$2"
+
+# Resolve to absolute path so git worktree commands work regardless of cwd
+ANCESTRY_ABS=$(cd "$ANCESTRY" && pwd)
+
+# If the branch is already checked out in any worktree, use that path.
+# Otherwise create one at <ancestry>-<branch>.
+ensure_worktree() {
+  local branch="$1"
+  local existing target
+  existing=$(cd "$ANCESTRY_ABS" && git worktree list --porcelain \
+    | awk -v b="refs/heads/$branch" '
+      /^worktree / { wt=$2 }
+      $0 == "branch " b { print wt; exit }')
+  if [ -n "$existing" ]; then
+    echo "  found checkout for $branch: $existing" >&2
+    echo "$existing"
+    return
+  fi
+  target="${ANCESTRY_ABS}-${branch}"
+  if [ -d "$target" ]; then
+    echo "  worktree dir exists for $branch: $target" >&2
+  else
+    echo "  creating worktree for $branch: $target" >&2
+    (cd "$ANCESTRY_ABS" && git worktree add "$target" "$branch") >&2
+  fi
+  echo "$target"
+}
+
+BEFORE_PATH=$(ensure_worktree "$BEFORE")
+AFTER_PATH=$(ensure_worktree "$AFTER")
+
+PASSTHROUGH=()
+for cfg in "${CONFIGS[@]}"; do
+  PASSTHROUGH+=("-c" "$cfg")
+done
+[ -n "$METRICS" ] && PASSTHROUGH+=("--metrics" "$METRICS")
+
+# Always re-run AFTER (fresh numbers); BEFORE only re-runs with --force.
+echo ""
+echo "--- before: $BEFORE ---"
+bin/run_versions $CLEAN $FORCE -b "$BENCH" "${PASSTHROUGH[@]}" "$BEFORE" "$BEFORE_PATH"
+
+echo ""
+echo "--- after: $AFTER ---"
+bin/run_versions --force -b "$BENCH" "${PASSTHROUGH[@]}" "$AFTER" "$AFTER_PATH"

@@ -1,14 +1,21 @@
 #!/bin/bash
-# Run read_bench against ancestry version worktrees.
+# Run a benchmark against ancestry version worktrees.
 #
-# Usage: bin/run_versions [--clean] [--force] [--bench BENCH] <label> <path> [...]
+# Usage: bin/run_versions [options] <label> <path> [<label> <path> ...]
+#
+#   --clean, -x            Remove results JSON before running
+#   --force, -f            Re-run even if results exist
+#   --bench, -b BENCH      Bench script (default: read_bench.rb)
+#   --config, -c CONFIG    Config to run (repeatable). Without -c, bench's default is used.
+#   --metrics, -m METRICS  Metrics list passed to the bench (e.g. queries,rows)
 #
 # Results accumulate in results/1/{bench}_versions.json.
 #
 # Examples:
 #   bin/run_versions v4.1.0 ../ancestry-v4.1.0 v5.0.0 ../ancestry-v5.0.0
 #   bin/run_versions --clean --force v4.1.0 ../ancestry-v4.1.0
-#   bin/run_versions --bench write_bench v4.1.0 ../ancestry-v4.1.0
+#   bin/run_versions -c mp3 master ../ancestry-master attribute2 ../ancestry-attribute2
+#   bin/run_versions --bench write_bench.rb v4.1.0 ../ancestry-v4.1.0
 
 source /opt/homebrew/share/chruby/chruby.sh 2>/dev/null
 chruby ruby-4.0.2 2>/dev/null
@@ -17,19 +24,34 @@ DB=${DB:-pg}
 FORCE=""
 CLEAN=""
 BENCH="read_bench.rb"
+CONFIGS=()
+METRICS=""
 
-while [[ "$1" == --* ]]; do
+usage() {
+  sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//' >&2
+  exit "${1:-1}"
+}
+
+while [ $# -gt 0 ]; do
   case "$1" in
-    --clean) CLEAN=1; shift ;;
-    --force) FORCE="--force"; shift ;;
-    --bench) BENCH="$2"; shift 2 ;;
-    *) echo "Unknown option: $1"; exit 1 ;;
+    --clean|-x)        CLEAN=1; shift ;;
+    --force|-f)        FORCE="--force"; shift ;;
+    --bench|-b)        BENCH="$2"; shift 2 ;;
+    --bench=*)         BENCH="${1#*=}"; shift ;;
+    --config|-c)       CONFIGS+=("$2"); shift 2 ;;
+    --config=*)        CONFIGS+=("${1#*=}"); shift ;;
+    --metrics|-m)      METRICS="$2"; shift 2 ;;
+    --metrics=*)       METRICS="${1#*=}"; shift ;;
+    -h|--help)         usage 0 ;;
+    --)                shift; break ;;
+    -*)                echo "Unknown option: $1" >&2; usage ;;
+    *)                 break ;;
   esac
 done
 
 if [ $# -lt 2 ] || [ $(($# % 2)) -ne 0 ]; then
-  echo "Usage: $0 [--clean] [--force] [--bench BENCH] <label> <path> [<label> <path> ...]"
-  exit 1
+  echo "Expected pairs of <label> <path>" >&2
+  usage
 fi
 
 base=$(basename "$BENCH" .rb)
@@ -40,10 +62,25 @@ if [ "$CLEAN" = "1" ]; then
   echo "Cleaned $json_file"
 fi
 
+# Empty entry means "use bench's default config"
+if [ ${#CONFIGS[@]} -eq 0 ]; then
+  CONFIGS=("")
+fi
+
+METRICS_ARG=()
+[ -n "$METRICS" ] && METRICS_ARG=(--metrics "$METRICS")
+
 while [ $# -ge 2 ]; do
   label="$1"; path="$2"; shift 2
-  echo "=== $label from $path ==="
-  ANCESTRY_PATH="$path" DB="$DB" bundle exec ruby "$BENCH" -v "$label" $FORCE
+  for cfg in "${CONFIGS[@]}"; do
+    if [ -n "$cfg" ]; then
+      echo "=== $label ($cfg) from $path ==="
+      ANCESTRY_PATH="$path" DB="$DB" bundle exec ruby "$BENCH" -v "$label" -c "$cfg" $FORCE "${METRICS_ARG[@]}"
+    else
+      echo "=== $label from $path ==="
+      ANCESTRY_PATH="$path" DB="$DB" bundle exec ruby "$BENCH" -v "$label" $FORCE "${METRICS_ARG[@]}"
+    fi
+  done
 done
 
 echo ""
